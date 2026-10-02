@@ -28,7 +28,7 @@ migrate-down:
 	migrate -path db/migrations -database "postgresql://postgres:password@localhost:5432/ecommerce_shop?sslmode=disable" down
 
 docker-up:
-	docker compose -f docker/docker-compose.yaml up -d
+	docker compose -f docker/docker-compose.yaml --env-file .env up -d
 
 docker-down:
-	docker compose -f docker/docker-compose.yaml down -d
+	docker compose -f docker/docker-compose.yaml --env-file .env down
