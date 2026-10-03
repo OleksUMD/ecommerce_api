@@ -1,3 +1,4 @@
+// Package config contains all structs and functions for the app configuration
 package config
 
 import (
@@ -8,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// Config is a main container for other type of settings
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -16,11 +18,13 @@ type Config struct {
 	Upload   UploadConfig
 }
 
+// ServerConfig is a container for server configuration
 type ServerConfig struct {
 	Port    string
 	GinMode string
 }
 
+// DatabaseConfig is a container for database configuration
 type DatabaseConfig struct {
 	Host     string
 	Port     string
@@ -30,12 +34,14 @@ type DatabaseConfig struct {
 	SSLMode  string
 }
 
+// JWTConfig is a container for authentication settings
 type JWTConfig struct {
 	Secret              string
 	ExpiresIn           time.Duration
 	RefreshtokenExpires time.Duration
 }
 
+// AWSConfig contains settings for AWS services
 type AWSConfig struct {
 	Region          string
 	AccessKeyID     string
@@ -44,11 +50,13 @@ type AWSConfig struct {
 	S3Endpoint      string
 }
 
+// UploadConfig contains settings for file storage service
 type UploadConfig struct {
 	Path        string
 	MaxFileSize int64
 }
 
+// Load get configuration from environment variables and create corresponding container(struct) for each of them
 func Load() (*Config, error) {
 	var err error
 

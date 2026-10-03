@@ -1,3 +1,4 @@
+// Package models contains database models related to the ecommerce api
 package models
 
 import (
@@ -6,8 +7,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// OrderStatus represents order status type
 type OrderStatus string
 
+// Current order status is one of
 const (
 	OrderStatusPending   OrderStatus = "pending"
 	OrderStatusConfirmed OrderStatus = "confirmed"
@@ -16,6 +19,7 @@ const (
 	OrderStatusCancelled OrderStatus = "cancelled"
 )
 
+// Order is a database table for user's order
 type Order struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
 	UserID      uint           `json:"user_id" gorm:"not null"`
@@ -30,6 +34,7 @@ type Order struct {
 	OrderItems []OrderItem `json:"order_items"`
 }
 
+// OrderItem is a database table that represents particular order item
 type OrderItem struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	UserID    uint           `json:"user_id" gorm:"not null"`
@@ -44,6 +49,7 @@ type OrderItem struct {
 	Product Product `json:"product"`
 }
 
+// Cart is a database model of the current user's cart
 type Cart struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	UserID    uint           `json:"user_id" gorm:"uniqueIndex;not null"`
@@ -55,6 +61,7 @@ type Cart struct {
 	CartItems []CartItem `json:"cart_items"`
 }
 
+// CartItem is a database model of a particular item in the user's cart
 type CartItem struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	CartID    uint           `json:"cart_id" gorm:"not null"`

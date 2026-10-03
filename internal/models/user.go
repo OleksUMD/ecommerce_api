@@ -6,13 +6,16 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserRole represents the current role for registered users
 type UserRole string
 
+// Logged in user is either a customer or an admin
 const (
 	UserRoleCustomer UserRole = "customer"
 	UserRoleAdmin    UserRole = "admin"
 )
 
+// User is a database table for registered users
 type User struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	Email     string         `json:"email" gorm:"uniqueIndex;not null"`
@@ -32,6 +35,7 @@ type User struct {
 	Cart          Cart           `json:"-"`
 }
 
+// RefreshToken is a database table for authenticated users's JWT tokens
 type RefreshToken struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	UserID    uint           `json:"user_id" gorm:"not null"`

@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Category represents the product category in the database
 type Category struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
 	Name        string         `json:"name" gorm:"not null"`
@@ -19,6 +20,7 @@ type Category struct {
 	Products []Product `json:"-"`
 }
 
+// Product is the database table for the product entity
 type Product struct {
 	ID          uint           `json:"id" gorm:"primaryKey"`
 	CategoryID  uint           `json:"category_id" gorm:"not null"`
@@ -39,6 +41,7 @@ type Product struct {
 	CartItems  []CartItem     `json:"-"`
 }
 
+// ProductImage is the database table for the product's image entity
 type ProductImage struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
 	ProductID uint           `json:"product_id" gorm:"not null"`
