@@ -30,6 +30,7 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		// TODO: check if refresh token also valid otherwise return 401
 
 		c.Set("user_id", claims.UserID)
 		c.Set("user_email", claims.Email)

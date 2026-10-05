@@ -37,7 +37,7 @@ type Order struct {
 // OrderItem is a database table that represents particular order item
 type OrderItem struct {
 	ID        uint           `json:"id" gorm:"primaryKey"`
-	UserID    uint           `json:"user_id" gorm:"not null"`
+	OrderID   uint           `json:"order_id" gorm:"not null"`
 	ProductID uint           `json:"product_id" gorm:"not null"`
 	Quantity  int            `json:"quantity" gorm:"not null"`
 	Price     float64        `json:"price" gorm:"not null"`

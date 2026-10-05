@@ -34,6 +34,18 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(s.corsMiddleare())
 	router.GET("/health", s.healthCheck)
+
+	api := router.Group("/api/v1")
+	auth := api.Group("auth")
+	auth.POST("/register", s.register)
+	auth.POST("/login", s.login)
+	auth.POST("/logout", s.logout)
+	auth.POST("/refresh", s.refreshToken)
+	userRoutes := api.Group("users")
+	userRoutes.Use(s.authMiddleware())
+	userRoutes.GET("/profile", s.getProfile)
+	userRoutes.PUT("/profile", s.updateProfile)
+
 	return router
 }
 
