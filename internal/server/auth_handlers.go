@@ -20,7 +20,6 @@ func (s *Server) register(c *gin.Context) {
 		return
 	}
 	utils.CreatedResponse(c, "User registered successfully", response)
-	return
 }
 
 func (s *Server) login(c *gin.Context) {
@@ -36,7 +35,6 @@ func (s *Server) login(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Login successful", response)
-	return
 }
 
 func (s *Server) refreshToken(c *gin.Context) {
@@ -52,7 +50,6 @@ func (s *Server) refreshToken(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Token refreshed successfully", response)
-	return
 }
 
 func (s *Server) logout(c *gin.Context) {
@@ -68,7 +65,6 @@ func (s *Server) logout(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Logout successful", nil)
-	return
 }
 
 func (s *Server) getProfile(c *gin.Context) {
@@ -80,7 +76,6 @@ func (s *Server) getProfile(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Get profile success", response)
-	return
 }
 
 func (s *Server) updateProfile(c *gin.Context) {
@@ -98,5 +93,4 @@ func (s *Server) updateProfile(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Profile updated successfully", response)
-	return
 }

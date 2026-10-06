@@ -47,6 +47,15 @@ func CreatedResponse(c *gin.Context, message string, data any) {
 	})
 }
 
+// SuccessNoContentResponse is a standard successful DELETE response or any other where response data is nil
+func SuccessNoContentResponse(c *gin.Context, message string, data any) {
+	c.JSON(http.StatusNoContent, Response{
+		Success: true,
+		Message: message,
+		Data:    data,
+	})
+}
+
 // ErrorResponse is base error response for any exception
 func ErrorResponse(c *gin.Context, statusCode int, message string, err error) {
 	response := Response{

@@ -41,10 +41,26 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	auth.POST("/login", s.login)
 	auth.POST("/logout", s.logout)
 	auth.POST("/refresh", s.refreshToken)
-	userRoutes := api.Group("users")
-	userRoutes.Use(s.authMiddleware())
+
+	// Private routes
+	protected := api.Group("/")
+	protected.Use(s.authMiddleware())
+	userRoutes := protected.Group("users")
 	userRoutes.GET("/profile", s.getProfile)
 	userRoutes.PUT("/profile", s.updateProfile)
+	categoryRoutes := protected.Group("categories")
+	categoryRoutes.POST("/", s.adminMiddleware(), s.createCategory)
+	categoryRoutes.PUT("/:id", s.adminMiddleware(), s.updateCategory)
+	categoryRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteCategory)
+	productRoutes := protected.Group("products")
+	productRoutes.POST("/", s.adminMiddleware(), s.createProduct)
+	productRoutes.PUT("/:id", s.adminMiddleware(), s.updateProduct)
+	productRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteProduct)
+
+	// Public routes
+	api.GET("/categories", s.getCategories)
+	api.GET("/products", s.getProducts)
+	api.GET("/products/:id", s.getProduct)
 
 	return router
 }

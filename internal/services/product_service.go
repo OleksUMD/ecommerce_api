@@ -15,8 +15,8 @@ type ProductService struct {
 	config *config.Config
 }
 
-func NewProductService(db *gorm.DB, config *config.Config) *UserService {
-	return &UserService{
+func NewProductService(db *gorm.DB, config *config.Config) *ProductService {
+	return &ProductService{
 		db:     db,
 		config: config,
 	}
