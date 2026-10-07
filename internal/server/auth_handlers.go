@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/OleksUMD/ecommerce_api/internal/dto"
-	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -13,8 +12,7 @@ func (s *Server) register(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.Register(&req)
+	response, err := s.authService.Register(&req)
 	if err != nil {
 		utils.BadRequestResponse(c, "Registration failed", err)
 		return
@@ -28,8 +26,7 @@ func (s *Server) login(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.Login(&req)
+	response, err := s.authService.Login(&req)
 	if err != nil {
 		utils.BadRequestResponse(c, "Login failed", err)
 		return
@@ -43,8 +40,7 @@ func (s *Server) refreshToken(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.RefreshToken(&req)
+	response, err := s.authService.RefreshToken(&req)
 	if err != nil {
 		utils.UnauthorizedResponse(c, "Refresh token failed", err)
 		return
@@ -58,8 +54,7 @@ func (s *Server) logout(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	authService := services.NewAuthService(s.db, s.config)
-	err := authService.Logout(req.RefreshToken)
+	err := s.authService.Logout(req.RefreshToken)
 	if err != nil {
 		utils.InternalServerErrorResponse(c, "Failed to logout", err)
 		return
@@ -69,8 +64,7 @@ func (s *Server) logout(c *gin.Context) {
 
 func (s *Server) getProfile(c *gin.Context) {
 	userID := c.GetUint("user_id")
-	userService := services.NewUserService(s.db, s.config)
-	response, err := userService.GetProfile(userID)
+	response, err := s.userService.GetProfile(userID)
 	if err != nil {
 		utils.NotFoundResponse(c, "User  not found", err)
 		return
@@ -86,8 +80,7 @@ func (s *Server) updateProfile(c *gin.Context) {
 		return
 	}
 	userID := c.GetUint("user_id")
-	userService := services.NewUserService(s.db, s.config)
-	response, err := userService.UpdateProfile(userID, &req)
+	response, err := s.userService.UpdateProfile(userID, &req)
 	if err != nil {
 		utils.BadRequestResponse(c, "Failed to update profile", err)
 		return

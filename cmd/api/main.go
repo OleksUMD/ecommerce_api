@@ -14,7 +14,9 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/database"
 	"github.com/OleksUMD/ecommerce_api/internal/logger"
+	"github.com/OleksUMD/ecommerce_api/internal/providers"
 	"github.com/OleksUMD/ecommerce_api/internal/server"
+	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,7 +41,11 @@ func main() {
 		}
 	}()
 	gin.SetMode(cfg.Server.GinMode)
-	srv := server.New(cfg, db, log)
+	authService := services.NewAuthService(db, cfg)
+	userService := services.NewUserService(db, cfg)
+	productService := services.NewProductService(db, cfg)
+	uploadService := services.NewUploadService(providers.NewLocalUploadProvider(cfg.Upload.Path))
+	srv := server.New(cfg, db, log, authService, productService, userService, uploadService)
 	router := srv.SetupRoutes()
 	httpServer := &http.Server{
 		Addr:         fmt.Sprintf(":%s", cfg.Server.Port),

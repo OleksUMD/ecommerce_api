@@ -48,7 +48,7 @@ func (s *Server) adminMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if role != models.UserRoleAdmin {
+		if role.(string) != string(models.UserRoleAdmin) {
 			utils.ForbiddenResponse(c, "Forbidden", nil)
 			c.Abort()
 			return

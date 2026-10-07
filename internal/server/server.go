@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/OleksUMD/ecommerce_api/internal/config"
+	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"gorm.io/gorm"
@@ -12,17 +13,33 @@ import (
 
 // Server is an app http server
 type Server struct {
-	config *config.Config
-	db     *gorm.DB
-	logger zerolog.Logger
+	config         *config.Config
+	db             *gorm.DB
+	logger         zerolog.Logger
+	authService    *services.AuthService
+	productService *services.ProductService
+	userService    *services.UserService
+	uploadService  *services.UploadService
 }
 
 // New creates and returns a new instance of app server
-func New(cfg *config.Config, db *gorm.DB, logger zerolog.Logger) *Server {
+func New(
+	cfg *config.Config,
+	db *gorm.DB,
+	logger zerolog.Logger,
+	authService *services.AuthService,
+	productService *services.ProductService,
+	userService *services.UserService,
+	uploadService *services.UploadService,
+) *Server {
 	return &Server{
-		config: cfg,
-		db:     db,
-		logger: logger,
+		config:         cfg,
+		db:             db,
+		logger:         logger,
+		authService:    authService,
+		productService: productService,
+		userService:    userService,
+		uploadService:  uploadService,
 	}
 }
 
@@ -34,6 +51,7 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(s.corsMiddleare())
 	router.GET("/health", s.healthCheck)
+	router.Static("/uploads", "./uploads")
 
 	api := router.Group("/api/v1")
 	auth := api.Group("auth")
@@ -45,17 +63,21 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	// Private routes
 	protected := api.Group("/")
 	protected.Use(s.authMiddleware())
+
 	userRoutes := protected.Group("users")
 	userRoutes.GET("/profile", s.getProfile)
 	userRoutes.PUT("/profile", s.updateProfile)
+
 	categoryRoutes := protected.Group("categories")
 	categoryRoutes.POST("/", s.adminMiddleware(), s.createCategory)
 	categoryRoutes.PUT("/:id", s.adminMiddleware(), s.updateCategory)
 	categoryRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteCategory)
+
 	productRoutes := protected.Group("products")
 	productRoutes.POST("/", s.adminMiddleware(), s.createProduct)
 	productRoutes.PUT("/:id", s.adminMiddleware(), s.updateProduct)
 	productRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteProduct)
+	productRoutes.POST("/:id/images", s.adminMiddleware(), s.uploadProductImage)
 
 	// Public routes
 	api.GET("/categories", s.getCategories)
