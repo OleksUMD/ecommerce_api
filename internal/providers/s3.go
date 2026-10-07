@@ -2,9 +2,10 @@ package providers
 
 import (
 	"context"
-	"log"
 	"mime/multipart"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	appconfig "github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -59,7 +60,12 @@ func (p *S3Provider) UploadFile(file *multipart.FileHeader, path string) (string
 	if err != nil {
 		return "", err
 	}
-	defer src.Close()
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close uploaded file")
+		}
+	}()
+
 	result, err := p.uploader.UploadObject(context.TODO(), &transfermanager.UploadObjectInput{
 		Bucket: aws.String(p.bucket),
 		Key:    aws.String(path),

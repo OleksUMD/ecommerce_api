@@ -5,6 +5,8 @@ import (
 	"mime/multipart"
 	"os"
 	"path/filepath"
+
+	"github.com/rs/zerolog/log"
 )
 
 type LocalUploadProvider struct {
@@ -26,13 +28,21 @@ func (p *LocalUploadProvider) UploadFile(file *multipart.FileHeader, path string
 	if err != nil {
 		return "", err
 	}
-	defer src.Close()
+	defer func() {
+		if err := src.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close uploaded file")
+		}
+	}()
 
 	dst, err := os.Create(fullPath)
 	if err != nil {
 		return "", err
 	}
-	defer dst.Close()
+	defer func() {
+		if err := dst.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close newly created file")
+		}
+	}()
 
 	if _, err := dst.ReadFrom(src); err != nil {
 		return "", err
