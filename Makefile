@@ -1,3 +1,5 @@
+include .env
+
 .PHONY: help build run dev lint migrate-up migrate-down
 
 help:
@@ -22,13 +24,13 @@ lint:
 	golangci-lint run ./...
 
 migrate-up:
-	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" up
+	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" up
 
 migrate-down:
-	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" down
+	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" down
 
 migrate-force-zero:
-	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" force
+	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" force
 
 
 docker-up:
