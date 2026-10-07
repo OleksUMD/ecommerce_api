@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/OleksUMD/ecommerce_api/internal/interfaces"
+	"github.com/google/uuid"
 )
 
 type UploadService struct {
@@ -23,7 +24,8 @@ func (s *UploadService) UploadProductImage(productID uint, file *multipart.FileH
 		return "", fmt.Errorf("invalid file type: %s", ext)
 	}
 
-	path := fmt.Sprintf("products/%d/%s", productID, file.Filename)
+	newFileName := uuid.New().String() + ext
+	path := fmt.Sprintf("products/%d/%s", productID, newFileName)
 	return s.provider.UploadFile(file, path)
 }
 
