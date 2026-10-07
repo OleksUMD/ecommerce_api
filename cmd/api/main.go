@@ -13,6 +13,7 @@ import (
 
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/database"
+	"github.com/OleksUMD/ecommerce_api/internal/interfaces"
 	"github.com/OleksUMD/ecommerce_api/internal/logger"
 	"github.com/OleksUMD/ecommerce_api/internal/providers"
 	"github.com/OleksUMD/ecommerce_api/internal/server"
@@ -44,7 +45,15 @@ func main() {
 	authService := services.NewAuthService(db, cfg)
 	userService := services.NewUserService(db, cfg)
 	productService := services.NewProductService(db, cfg)
-	uploadService := services.NewUploadService(providers.NewLocalUploadProvider(cfg.Upload.Path))
+
+	var uploadProvider interfaces.UploadProvider
+	if cfg.Upload.UploadProvider == "s3" {
+		uploadProvider = providers.NewS3Provider(cfg)
+	} else {
+		uploadProvider = providers.NewLocalUploadProvider(cfg.Upload.Path)
+	}
+
+	uploadService := services.NewUploadService(uploadProvider)
 	srv := server.New(cfg, db, log, authService, productService, userService, uploadService)
 	router := srv.SetupRoutes()
 	httpServer := &http.Server{

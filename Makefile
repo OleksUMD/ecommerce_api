@@ -22,10 +22,14 @@ lint:
 	golangci-lint run ./...
 
 migrate-up:
-	migrate -path db/migrations -database "postgresql://postgres:password@localhost:5432/ecommerce_shop?sslmode=disable" up
+	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" up
 
 migrate-down:
-	migrate -path db/migrations -database "postgresql://postgres:password@localhost:5432/ecommerce_shop?sslmode=disable" down
+	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" down
+
+migrate-force-zero:
+	migrate -path db/migrations -database "postgresql://postgres:Password123!@localhost:5445/ecommerce_api?sslmode=disable" force
+
 
 docker-up:
 	docker compose -f docker/docker-compose.yaml --env-file .env up -d

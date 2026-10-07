@@ -52,8 +52,9 @@ type AWSConfig struct {
 
 // UploadConfig contains settings for file storage service
 type UploadConfig struct {
-	Path        string
-	MaxFileSize int64
+	Path           string
+	MaxFileSize    int64
+	UploadProvider string
 }
 
 // Load get configuration from environment variables and create corresponding container(struct) for each of them
@@ -100,8 +101,9 @@ func Load() (*Config, error) {
 		RefreshtokenExpires: refreshTokenExpires,
 	}
 	upload := UploadConfig{
-		Path:        getEnv("UPLOAD_PATH", "8080"),
-		MaxFileSize: maxUploadSize,
+		Path:           getEnv("UPLOAD_PATH", "8080"),
+		MaxFileSize:    maxUploadSize,
+		UploadProvider: getEnv("UPLOAD_PROVIDER", "local"),
 	}
 	config := &Config{}
 	config.Server = server
