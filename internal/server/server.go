@@ -21,6 +21,7 @@ type Server struct {
 	userService    *services.UserService
 	uploadService  *services.UploadService
 	cartService    *services.CartService
+	orderService   *services.OrderService
 }
 
 // New creates and returns a new instance of app server
@@ -33,6 +34,7 @@ func New(
 	userService *services.UserService,
 	uploadService *services.UploadService,
 	cartService *services.CartService,
+	orderService *services.OrderService,
 ) *Server {
 	return &Server{
 		config:         cfg,
@@ -43,6 +45,7 @@ func New(
 		userService:    userService,
 		uploadService:  uploadService,
 		cartService:    cartService,
+		orderService:   orderService,
 	}
 }
 
@@ -87,6 +90,11 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	cartRoutes.POST("/items", s.addToCart)
 	cartRoutes.PUT("/items/:id", s.updateCartItem)
 	cartRoutes.DELETE("/items/:id", s.removeFromCart)
+
+	orderRoutes := protected.Group("orders")
+	orderRoutes.POST("/", s.createOrder)
+	orderRoutes.GET("/", s.getOrders)
+	orderRoutes.GET("/:id", s.getOrder)
 
 	// Public routes
 	api.GET("/categories", s.getCategories)

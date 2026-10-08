@@ -86,7 +86,7 @@ func (s *CartService) UpdateToCart(userID, itemID uint, req *dto.UpdateCartItemR
 }
 
 func (s *CartService) RemoveFromCart(userID, itemID uint) error {
-	return s.db.Where(
+	return s.db.Unscoped().Where(
 		"id = ? AND cart_id IN (?)", itemID,
 		s.db.Select("id").
 			Table("carts").
