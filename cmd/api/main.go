@@ -21,6 +21,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @title E-Commerce API
+// @version 1.0
+// @description A pet project simulating an e-commerce RESTful API built with Go, Gin and GORM
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name OleksUMD
+// @contact.url http://localhost:8080
+// @contact.mail OleksUMD@example.com
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8080
+// @basePath /api
+// @schemas http https
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func main() {
 	log := logger.New()
 	cfg, err := config.Load()

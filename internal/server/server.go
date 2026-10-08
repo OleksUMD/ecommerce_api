@@ -4,11 +4,15 @@ package server
 import (
 	"net/http"
 
+	_ "github.com/OleksUMD/ecommerce_api/docs"
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"gorm.io/gorm"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Server is an app http server
@@ -57,6 +61,10 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	router.Use(gin.Recovery())
 	router.Use(s.corsMiddleare())
 	router.GET("/health", s.healthCheck)
+
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.StaticFile("/api-docs", "./docs/rapidoc.html")
+
 	router.Static("/uploads", "./uploads")
 
 	api := router.Group("/api/v1")

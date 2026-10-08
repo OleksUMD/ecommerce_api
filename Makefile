@@ -10,6 +10,7 @@ help:
 	@echo " make lint           - Run linter on the codebase"
 	@echo " make migrate-up     - Apply database migrations"
 	@echo " make migrate-up     - Rollback database migrations"
+	@echo " make docs-generate  - Generate Swagger API documentation
 
 build:
 	go build -o bin/app ./cmd/api
@@ -38,3 +39,7 @@ docker-up:
 
 docker-down:
 	docker compose -f docker/docker-compose.yaml --env-file .env down
+
+docs-generate:
+	mkdir -p docs
+	swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal --exclude .git,docs,docker,db
