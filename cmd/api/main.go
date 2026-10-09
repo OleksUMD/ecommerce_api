@@ -13,6 +13,7 @@ import (
 
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/database"
+	"github.com/OleksUMD/ecommerce_api/internal/events"
 	"github.com/OleksUMD/ecommerce_api/internal/interfaces"
 	"github.com/OleksUMD/ecommerce_api/internal/logger"
 	"github.com/OleksUMD/ecommerce_api/internal/providers"
@@ -61,8 +62,14 @@ func main() {
 			log.Error().Err(err).Msg("failed to close database connection")
 		}
 	}()
+	ctx := context.Background()
+	eventPublisher, err := events.NewEventPublisher(ctx, &cfg.AWS)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to initialize event publisher")
+		return
+	}
 	gin.SetMode(cfg.Server.GinMode)
-	authService := services.NewAuthService(db, cfg)
+	authService := services.NewAuthService(db, cfg, eventPublisher)
 	userService := services.NewUserService(db, cfg)
 	productService := services.NewProductService(db, cfg)
 

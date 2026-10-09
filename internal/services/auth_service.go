@@ -2,24 +2,28 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/dto"
+	"github.com/OleksUMD/ecommerce_api/internal/events"
 	"github.com/OleksUMD/ecommerce_api/internal/models"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	db     *gorm.DB
-	config *config.Config
+	db             *gorm.DB
+	config         *config.Config
+	eventPublisher events.Publisher
 }
 
-func NewAuthService(db *gorm.DB, config *config.Config) *AuthService {
+func NewAuthService(db *gorm.DB, config *config.Config, eventPublisher events.Publisher) *AuthService {
 	return &AuthService{
-		db:     db,
-		config: config,
+		db:             db,
+		config:         config,
+		eventPublisher: eventPublisher,
 	}
 }
 
@@ -102,6 +106,10 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 		ExpiresAt: time.Now().Add(s.config.JWT.RefreshtokenExpires),
 	}
 	s.db.Create(&refreshTokenModel)
+	err = s.eventPublisher.Publish("USER_LOGGED_IN", user, map[string]string{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate auth event message: %w", err)
+	}
 	authResponse := &dto.AuthResponse{
 		User: dto.UserResponse{
 			ID:        user.ID,
