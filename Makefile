@@ -4,13 +4,17 @@ include .env
 
 help:
 	@echo "Available commands:"
-	@echo " make build          - Build the application"
-	@echo " make run            - Run the application"
-	@echo " make dev            - Run the application in development mode"
-	@echo " make lint           - Run linter on the codebase"
-	@echo " make migrate-up     - Apply database migrations"
-	@echo " make migrate-up     - Rollback database migrations"
-	@echo " make docs-generate  - Generate Swagger API documentation"
+	@echo " make build                    - Build the application"
+	@echo " make run                      - Run the application"
+	@echo " make dev                      - Run the application in development mode"
+	@echo " make lint                     - Run linter on the codebase"
+	@echo " make migrate-up               - Apply database migrations"
+	@echo " make migrate-down             - Rollback database migrations"
+	@echo " make docs-generate            - Generate Swagger API documentation"
+	@echo " make docker-up                - Start project in docker compose"
+	@echo " make docker-down              - Stop project in docker compose"
+	@echo " make docker-build-app         - Build app docker image"
+	@echo " make docker-build-notifier    - Build notifier docker image"
 
 build:
 	@echo "Building all binaries"
@@ -50,6 +54,9 @@ docker-down:
 
 docker-build-app:
 	docker compose -f docker/docker-compose.yaml --env-file .docker.env build app --no-cache
+
+docker-build-notifier:
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env build notifier --no-cache
 
 docs-generate:
 	mkdir -p docs

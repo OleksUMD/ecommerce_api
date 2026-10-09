@@ -9,6 +9,7 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/dto"
 	"github.com/OleksUMD/ecommerce_api/internal/events"
 	"github.com/OleksUMD/ecommerce_api/internal/models"
+	"github.com/OleksUMD/ecommerce_api/internal/notifications"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"gorm.io/gorm"
 )
@@ -106,7 +107,7 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 		ExpiresAt: time.Now().Add(s.config.JWT.RefreshtokenExpires),
 	}
 	s.db.Create(&refreshTokenModel)
-	err = s.eventPublisher.Publish("USER_LOGGED_IN", user, map[string]string{})
+	err = s.eventPublisher.Publish(notifications.UserLoggedIn, user, map[string]string{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate auth event message: %w", err)
 	}
