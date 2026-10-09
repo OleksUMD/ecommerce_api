@@ -10,7 +10,7 @@ bin/
 vendor/
 
 go.work
-.env
+*.env
 
 .vscode/
 .idea/

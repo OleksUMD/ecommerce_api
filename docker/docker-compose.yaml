@@ -51,6 +51,52 @@ services:
       - localstack_data:/var/lib/localstack
       - ./init/aws/init-localstack.sh:/etc/localstack/init/ready.d/init.sh
 
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - localstack
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT}
+      - AWS_REGION=${AWS_REGION}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_FROM=${SMTP_FROM}
+      - GIN_MODE=debug
+    command: ["./api"]
+
+  notifier:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      - postgres
+      - localstack
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SSLMODE=${DB_SSLMODE}
+      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT}
+      - AWS_REGION=${AWS_REGION}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_FROM=${SMTP_FROM}
+    command: ["./notifier"]
+    deploy:
+      replicas: 1
+
 volumes:
   postgres_data:
   localstack_data:

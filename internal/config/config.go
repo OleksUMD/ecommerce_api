@@ -16,6 +16,7 @@ type Config struct {
 	JWT      JWTConfig
 	AWS      AWSConfig
 	Upload   UploadConfig
+	SMTP     SMTPConfig
 }
 
 // ServerConfig is a container for server configuration
@@ -51,6 +52,14 @@ type AWSConfig struct {
 	EventQueueName  string
 }
 
+type SMTPConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	From     string
+}
+
 // UploadConfig contains settings for file storage service
 type UploadConfig struct {
 	Path           string
@@ -76,9 +85,13 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	smtpPort, err := strconv.Atoi(getEnv("SMTP_PORT", "1025"))
+	if err != nil {
+		return nil, err
+	}
 	server := ServerConfig{
 		Port:    getEnv("PORT", "8080"),
-		GinMode: getEnv("GIN_MODE", "8080"),
+		GinMode: getEnv("GIN_MODE", "release"),
 	}
 	database := DatabaseConfig{
 		Host:     getEnv("DB_HOST", "localhost"),
@@ -107,12 +120,21 @@ func Load() (*Config, error) {
 		MaxFileSize:    maxUploadSize,
 		UploadProvider: getEnv("UPLOAD_PROVIDER", "local"),
 	}
+	smtp := SMTPConfig{
+		Host:     getEnv("SMTP_HOST", "localhost"),
+		Port:     smtpPort,
+		Username: getEnv("SMTP_USERNAME", ""),
+		Password: getEnv("SMTP_PASSWORD", ""),
+		From:     getEnv("SMTP_FROM", "noreply@shop.com"),
+	}
+
 	config := &Config{}
 	config.Server = server
 	config.Database = database
 	config.AWS = aws
 	config.JWT = jwt
 	config.Upload = upload
+	config.SMTP = smtp
 	return config, err
 }
 

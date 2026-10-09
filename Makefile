@@ -43,10 +43,13 @@ migrate-force-zero:
 
 
 docker-up:
-	docker compose -f docker/docker-compose.yaml --env-file .env up -d
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env up -d
 
 docker-down:
-	docker compose -f docker/docker-compose.yaml --env-file .env down
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env down
+
+docker-build-app:
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env build app --no-cache
 
 docs-generate:
 	mkdir -p docs
