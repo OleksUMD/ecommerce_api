@@ -18,24 +18,24 @@ import (
 type Server struct {
 	config         *config.Config
 	logger         zerolog.Logger
-	authService    *services.AuthService
-	productService *services.ProductService
-	userService    *services.UserService
-	uploadService  *services.UploadService
-	cartService    *services.CartService
-	orderService   *services.OrderService
+	authService    services.AuthServiceInterface
+	productService services.ProductServiceInterface
+	userService    services.UserServiceInterface
+	uploadService  services.UploadServiceInterface
+	cartService    services.CartServiceInterface
+	orderService   services.OrderServiceInterface
 }
 
 // New creates and returns a new instance of app server
 func New(
 	cfg *config.Config,
 	logger zerolog.Logger,
-	authService *services.AuthService,
-	productService *services.ProductService,
-	userService *services.UserService,
-	uploadService *services.UploadService,
-	cartService *services.CartService,
-	orderService *services.OrderService,
+	authService services.AuthServiceInterface,
+	productService services.ProductServiceInterface,
+	userService services.UserServiceInterface,
+	uploadService services.UploadServiceInterface,
+	cartService services.CartServiceInterface,
+	orderService services.OrderServiceInterface,
 ) *Server {
 	return &Server{
 		config:         cfg,
