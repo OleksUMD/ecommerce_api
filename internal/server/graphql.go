@@ -10,6 +10,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/OleksUMD/ecommerce_api/graph"
 	"github.com/OleksUMD/ecommerce_api/graph/resolver"
+	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -63,13 +64,13 @@ func (s *Server) graphQLPlaygroundPublicHandler() gin.HandlerFunc {
 
 func (s *Server) graphQLMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userID, _ := c.Get("user_id")
-		userRole, _ := c.Get("user_role")
-		userEmail, _ := c.Get("user_email")
+		userID, _ := c.Get(utils.UserIDKey)
+		userRole, _ := c.Get(utils.UserRoleKey)
+		userEmail, _ := c.Get(utils.UserEmailKey)
 
-		ctx := context.WithValue(c.Request.Context(), "user_id", userID)
-		ctx = context.WithValue(ctx, "user_role", userRole)
-		ctx = context.WithValue(ctx, "user_email", userEmail)
+		ctx := context.WithValue(c.Request.Context(), utils.UserIDKey, userID)
+		ctx = context.WithValue(ctx, utils.UserRoleKey, userRole)
+		ctx = context.WithValue(ctx, utils.UserEmailKey, userEmail)
 		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 	}

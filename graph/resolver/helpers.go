@@ -3,14 +3,14 @@ package resolver
 import (
 	"context"
 	"errors"
+
+	"github.com/OleksUMD/ecommerce_api/internal/utils"
 )
 
 var ErrUnauthorized = errors.New("unauthorized")
 
-const adminRole = "admin"
-
 func GetUserIDFromContext(ctx context.Context) (uint, error) {
-	userID := ctx.Value("user_id")
+	userID := ctx.Value(utils.UserIDKey)
 	if userID == nil {
 		return 0, ErrUnauthorized
 	}
@@ -21,7 +21,7 @@ func GetUserIDFromContext(ctx context.Context) (uint, error) {
 }
 
 func GetUserRoleFromContext(ctx context.Context) (string, error) {
-	userRole := ctx.Value("user_role")
+	userRole := ctx.Value(utils.UserRoleKey)
 	if userRole == nil {
 		return "", ErrUnauthorized
 	}
@@ -36,11 +36,10 @@ func IsAdminFromContext(ctx context.Context) bool {
 	if err != nil {
 		return false
 	}
-	return userRole == adminRole
+	return userRole == string(utils.AdminRole)
 }
 
-func getPagingNumbers(page *int, limit *int) (int, int) {
-	var p, l int
+func getPagingNumbers(page *int, limit *int) (p, l int) {
 	if page != nil {
 		p = *page
 	}

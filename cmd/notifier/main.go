@@ -25,7 +25,7 @@ func main() {
 	cfg, err := config.Load()
 
 	if err != nil {
-		log.Fatalf("Failed to load config: %w", err)
+		log.Fatalf("Failed to load config: %v\n", err)
 	}
 
 	emailConfig := &notifications.SMTPConfig{
@@ -39,7 +39,7 @@ func main() {
 	emailNotifier := notifications.NewEmailNotifier(emailConfig)
 	awsConfig, err := providers.CreateAWSConfig(ctx, cfg.AWS.S3Endpoint, cfg.AWS.Region)
 	if err != nil {
-		log.Fatalf("Failed to create AWS config: %w", err)
+		log.Fatalf("Failed to create AWS config: %v\n", err)
 	}
 
 	logger := watermill.NewStdLogger(false, false)
@@ -47,14 +47,14 @@ func main() {
 		AWSConfig: awsConfig,
 	}, logger)
 	if err != nil {
-		log.Fatalf("Failed to initialize SQS subscriber: %w", err)
+		log.Fatalf("Failed to initialize SQS subscriber: %v\n", err)
 	}
 	messages, err := subscriber.Subscribe(ctx, cfg.AWS.EventQueueName)
 	if err != nil {
 		if errClose := subscriber.Close(); errClose != nil {
-			log.Fatalf("Failed to subscribe to the queue and close the subscriber: %w\n%w", err, errClose)
+			log.Fatalf("Failed to subscribe to the queue and close the subscriber: %v\n%v", err, errClose)
 		}
-		log.Fatalf("Failed to subscribe to the queue: %w", err)
+		log.Fatalf("Failed to subscribe to the queue: %v\n", err)
 	}
 
 	sigChan := make(chan os.Signal, 1)
@@ -66,7 +66,7 @@ func main() {
 		select {
 		case msg := <-messages:
 			if err := processMessage(msg, emailNotifier); err != nil {
-				log.Printf("Error processing message: %w", err)
+				log.Printf("Error processing message: %v\n", err)
 				msg.Nack()
 			} else {
 				msg.Ack()
@@ -74,7 +74,7 @@ func main() {
 		case <-sigChan:
 			log.Println("Shutting down the notification service...")
 			if err := subscriber.Close(); err != nil {
-				log.Fatalf("Failed to close the subscriber: %w\n%w", err)
+				log.Fatalf("Failed to close the subscriber: %v\n", err)
 			}
 			return
 		}
@@ -87,7 +87,7 @@ func processMessage(msg *message.Message, notifier *notifications.EmailNotifier)
 	case notifications.UserLoggedIn:
 		return handleUserLoggedIn(msg, notifier)
 	default:
-		log.Printf("Unknown event type: %s", eventType)
+		log.Printf("Unknown event type: %s\n", eventType)
 		return nil
 	}
 }
@@ -101,6 +101,6 @@ func handleUserLoggedIn(msg *message.Message, notifier *notifications.EmailNotif
 	if userName == " " {
 		userName = "user"
 	}
-	log.Printf("Sending login notification to %s", userName)
+	log.Printf("Sending login notification to %s\n", userName)
 	return notifier.SendLoginNotification(user.Email, userName)
 }
