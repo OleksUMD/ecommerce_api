@@ -61,3 +61,6 @@ docker-build-notifier:
 docs-generate:
 	mkdir -p docs
 	swag init -g cmd/api/main.go -o docs --parseDependency --parseInternal --exclude .git,docs,docker,db
+
+graph-generate:
+	@go tool gqlgen generate

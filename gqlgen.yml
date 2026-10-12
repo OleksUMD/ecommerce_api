@@ -1,0 +1,65 @@
+schema:
+  -graph/schema/*.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema  # generates separate file per schema type
+
+  dir: graph/resolver
+  package: resolver
+  filename_template: "{name}.resolvers.go"
+
+autobind:
+  - github.com/OleksUMD/ecommerce_api/internal/dto
+
+models:
+  User:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.UserResponse
+  AuthPayload:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.AuthResponse
+  Product:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.ProductResponse
+  Category:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.CategoryResponse
+  Cart:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.CartResponse
+  CartItem:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.CartItemResponse
+  Order:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.OrderResponse
+  OrderItem:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.OrderItemResponse
+  ProductImage:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.ProductImageResponse
+
+  RegisterInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RegisterRequest
+  LoginInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.LoginRequest
+  RefreshTokenInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  UpdateProfileInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  CreateCategoryInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  UpdateCategoryInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  UpdateCartItemInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  CreateProductInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  UpdateProductInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  AddToCartInput:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+  ID:
+    model: github.com/99designs/gqlgen/graphql.String
+  UInt:
+    model: github.com/99designs/gqlgen/graphql.Uint
