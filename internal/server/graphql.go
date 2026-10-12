@@ -54,6 +54,13 @@ func (s *Server) graphQLPlaygroundHandler() gin.HandlerFunc {
 	}
 }
 
+func (s *Server) graphQLPlaygroundPublicHandler() gin.HandlerFunc {
+	h := playground.Handler("GraphQL Playground(Public)", "/graphql/public")
+	return func(c *gin.Context) {
+		h.ServeHTTP(c.Writer, c.Request)
+	}
+}
+
 func (s *Server) graphQLMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, _ := c.Get("user_id")

@@ -67,7 +67,14 @@ func (s *Server) SetupRoutes() *gin.Engine {
 
 	router.Static("/uploads", "./uploads")
 
+	// default protected graphql playground
 	router.GET("/playground", s.graphQLPlaygroundHandler())
+
+	router.GET("/playground/public", s.graphQLPlaygroundPublicHandler())
+	graphqlPublic := router.Group("/graphql/public")
+	graphqlPublic.Use(s.graphQLMiddleware())
+	graphqlPublic.POST("/", s.graphQLHandler())
+
 	graphqlProtected := router.Group("/graphql")
 	graphqlProtected.Use(s.authMiddleware())
 	graphqlProtected.Use(s.graphQLMiddleware())

@@ -183,7 +183,6 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, id string) (bool,
 		return false, err
 	}
 	return true, nil
-
 }
 
 // CreateOrder is the resolver for the createOrder field.
@@ -210,7 +209,6 @@ func (r *queryResolver) Me(ctx context.Context) (*dto.UserResponse, error) {
 		return nil, err
 	}
 	return user, nil
-
 }
 
 // Products is the resolver for the products field.
@@ -331,20 +329,3 @@ type (
 	mutationResolver struct{ *Resolver }
 	queryResolver    struct{ *Resolver }
 )
-
-func getPagingNumbers(page *int, limit *int) (int, int) {
-	var p, l int
-	if page != nil {
-		p = *page
-	}
-	if limit != nil {
-		l = *limit
-	}
-	if p <= 0 {
-		p = 1
-	}
-	if l <= 0 {
-		l = 10
-	}
-	return p, l
-}

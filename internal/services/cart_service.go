@@ -120,6 +120,8 @@ func (s *CartService) convertToCartResponse(cart *models.Cart) *dto.CartResponse
 					IsActive:    cart.CartItems[i].Product.Category.IsActive,
 				},
 			},
+			CreatedAt: cart.CartItems[i].CreatedAt,
+			UpdatedAt: cart.CartItems[i].UpdatedAt,
 		}
 		total += subtotal
 	}
@@ -128,5 +130,7 @@ func (s *CartService) convertToCartResponse(cart *models.Cart) *dto.CartResponse
 		UserID:    cart.UserID,
 		CartItems: items,
 		Total:     total,
+		CreatedAt: cart.CreatedAt,
+		UpdatedAt: cart.UpdatedAt,
 	}
 }

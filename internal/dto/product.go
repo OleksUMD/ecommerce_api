@@ -1,5 +1,7 @@
 package dto
 
+import "time"
+
 // CreateCategoryRequest add a new product category to the system
 type CreateCategoryRequest struct {
 	Name        string `json:"name" binding:"required"`
@@ -15,10 +17,12 @@ type UpdateCategoryRequest struct {
 
 // CategoryResponse get info about a particular product category
 type CategoryResponse struct {
-	ID          uint   `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	IsActive    bool   `json:"is_active"`
+	ID          uint      `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	IsActive    bool      `json:"is_active"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // CreateProductRequest add a new product to the system
@@ -53,12 +57,15 @@ type ProductResponse struct {
 	IsActive    bool                   `json:"is_active"`
 	Category    CategoryResponse       `json:"category"`
 	Images      []ProductImageResponse `json:"images"`
+	CreatedAt   time.Time              `json:"created_at"`
+	UpdatedAt   time.Time              `json:"updated_at"`
 }
 
 // ProductImageResponse get info about a particular product's image
 type ProductImageResponse struct {
-	ID        uint   `json:"id"`
-	URL       string `json:"url"`
-	AltText   string `json:"alt_text"`
-	IsPrimary bool   `json:"is_primary"`
+	ID        uint      `json:"id"`
+	URL       string    `json:"url"`
+	AltText   string    `json:"alt_text"`
+	IsPrimary bool      `json:"is_primary"`
+	CreatedAt time.Time `json:"created_at"`
 }

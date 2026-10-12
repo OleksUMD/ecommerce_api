@@ -1,6 +1,8 @@
 // Package dto contains data transfer objects through API
 package dto
 
+import "time"
+
 // RegisterRequest send by user when the one is registering in the system
 type RegisterRequest struct {
 	Email     string `json:"email" binding:"required,email"`
@@ -30,13 +32,15 @@ type AuthResponse struct {
 
 // UserResponse is received by the user when the one ask for its own info from the system
 type UserResponse struct {
-	ID        uint   `json:"id"`
-	Email     string `json:"email"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Phone     string `json:"phone"`
-	Role      string `json:"role"`
-	IsActive  bool   `json:"is_active"`
+	ID        uint      `json:"id"`
+	Email     string    `json:"email"`
+	FirstName string    `json:"first_name"`
+	LastName  string    `json:"last_name"`
+	Phone     string    `json:"phone"`
+	Role      string    `json:"role"`
+	IsActive  bool      `json:"is_active"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // UpdateProfileRequest request to change user's personal data
