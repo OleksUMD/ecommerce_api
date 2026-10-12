@@ -85,7 +85,6 @@ func main() {
 	orderService := services.NewOrderService(db, cfg)
 	srv := server.New(
 		cfg,
-		db,
 		log,
 		authService,
 		productService,

@@ -9,7 +9,6 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
-	"gorm.io/gorm"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -18,7 +17,6 @@ import (
 // Server is an app http server
 type Server struct {
 	config         *config.Config
-	db             *gorm.DB
 	logger         zerolog.Logger
 	authService    *services.AuthService
 	productService *services.ProductService
@@ -31,7 +29,6 @@ type Server struct {
 // New creates and returns a new instance of app server
 func New(
 	cfg *config.Config,
-	db *gorm.DB,
 	logger zerolog.Logger,
 	authService *services.AuthService,
 	productService *services.ProductService,
@@ -42,7 +39,6 @@ func New(
 ) *Server {
 	return &Server{
 		config:         cfg,
-		db:             db,
 		logger:         logger,
 		authService:    authService,
 		productService: productService,
