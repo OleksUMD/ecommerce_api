@@ -40,13 +40,6 @@ type ResolverRoot interface {
 	ProductImage() ProductImageResolver
 	Query() QueryResolver
 	User() UserResolver
-	AddToCartInput() AddToCartInputResolver
-	CreateCategoryInput() CreateCategoryInputResolver
-	CreateProductInput() CreateProductInputResolver
-	UpdateCartItemInput() UpdateCartItemInputResolver
-	UpdateCategoryInput() UpdateCategoryInputResolver
-	UpdateProductInput() UpdateProductInputResolver
-	UpdateProfileInput() UpdateProfileInputResolver
 }
 
 type DirectiveRoot struct {
@@ -67,10 +60,10 @@ type ComplexityRoot struct {
 	}
 
 	CartItem struct {
-		ID        func(childComplexity int) int
-		Product   func(childComplexity int) int
-		Quantitiy func(childComplexity int) int
-		Subtotal  func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Product  func(childComplexity int) int
+		Quantity func(childComplexity int) int
+		Subtotal func(childComplexity int) int
 	}
 
 	Category struct {
@@ -81,10 +74,10 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddToCart      func(childComplexity int, input dto.RefreshTokenRequest) int
-		CreateCategory func(childComplexity int, input dto.RefreshTokenRequest) int
+		AddToCart      func(childComplexity int, input dto.AddToCartRequest) int
+		CreateCategory func(childComplexity int, input dto.CreateCategoryRequest) int
 		CreateOrder    func(childComplexity int) int
-		CreateProduct  func(childComplexity int, input dto.RefreshTokenRequest) int
+		CreateProduct  func(childComplexity int, input dto.CreateProductRequest) int
 		DeleteCategory func(childComplexity int, id string) int
 		DeleteProduct  func(childComplexity int, id string) int
 		Login          func(childComplexity int, input dto.LoginRequest) int
@@ -92,10 +85,10 @@ type ComplexityRoot struct {
 		RefreshToken   func(childComplexity int, input dto.RefreshTokenRequest) int
 		Register       func(childComplexity int, input dto.RegisterRequest) int
 		RemoveFromCart func(childComplexity int, id string) int
-		UpdateCartItem func(childComplexity int, id string, input dto.RefreshTokenRequest) int
-		UpdateCategory func(childComplexity int, id string, input dto.RefreshTokenRequest) int
-		UpdateProduct  func(childComplexity int, id string, input dto.RefreshTokenRequest) int
-		UpdateProfile  func(childComplexity int, input dto.RefreshTokenRequest) int
+		UpdateCartItem func(childComplexity int, id string, input dto.UpdateCartItemRequest) int
+		UpdateCategory func(childComplexity int, id string, input dto.UpdateCategoryRequest) int
+		UpdateProduct  func(childComplexity int, id string, input dto.UpdateProductRequest) int
+		UpdateProfile  func(childComplexity int, input dto.UpdateProfileRequest) int
 	}
 
 	Order struct {
@@ -117,10 +110,10 @@ type ComplexityRoot struct {
 	}
 
 	OrderItem struct {
-		ID        func(childComplexity int) int
-		Price     func(childComplexity int) int
-		Product   func(childComplexity int) int
-		Quantitiy func(childComplexity int) int
+		ID       func(childComplexity int) int
+		Price    func(childComplexity int) int
+		Product  func(childComplexity int) int
+		Quantity func(childComplexity int) int
 	}
 
 	PageInfo struct {
@@ -190,8 +183,6 @@ type CartResolver interface {
 }
 type CartItemResolver interface {
 	ID(ctx context.Context, obj *dto.CartItemResponse) (string, error)
-
-	Quantitiy(ctx context.Context, obj *dto.CartItemResponse) (int, error)
 }
 type CategoryResolver interface {
 	ID(ctx context.Context, obj *dto.CategoryResponse) (string, error)
@@ -201,15 +192,15 @@ type MutationResolver interface {
 	Login(ctx context.Context, input dto.LoginRequest) (*dto.AuthResponse, error)
 	RefreshToken(ctx context.Context, input dto.RefreshTokenRequest) (*dto.AuthResponse, error)
 	Logout(ctx context.Context, input dto.RefreshTokenRequest) (bool, error)
-	UpdateProfile(ctx context.Context, input dto.RefreshTokenRequest) (*dto.UserResponse, error)
-	CreateCategory(ctx context.Context, input dto.RefreshTokenRequest) (*dto.CategoryResponse, error)
-	UpdateCategory(ctx context.Context, id string, input dto.RefreshTokenRequest) (*dto.CategoryResponse, error)
+	UpdateProfile(ctx context.Context, input dto.UpdateProfileRequest) (*dto.UserResponse, error)
+	CreateCategory(ctx context.Context, input dto.CreateCategoryRequest) (*dto.CategoryResponse, error)
+	UpdateCategory(ctx context.Context, id string, input dto.UpdateCategoryRequest) (*dto.CategoryResponse, error)
 	DeleteCategory(ctx context.Context, id string) (bool, error)
-	CreateProduct(ctx context.Context, input dto.RefreshTokenRequest) (*dto.ProductResponse, error)
-	UpdateProduct(ctx context.Context, id string, input dto.RefreshTokenRequest) (*dto.ProductResponse, error)
+	CreateProduct(ctx context.Context, input dto.CreateProductRequest) (*dto.ProductResponse, error)
+	UpdateProduct(ctx context.Context, id string, input dto.UpdateProductRequest) (*dto.ProductResponse, error)
 	DeleteProduct(ctx context.Context, id string) (bool, error)
-	AddToCart(ctx context.Context, input dto.RefreshTokenRequest) (*dto.CartResponse, error)
-	UpdateCartItem(ctx context.Context, id string, input dto.RefreshTokenRequest) (*dto.CartResponse, error)
+	AddToCart(ctx context.Context, input dto.AddToCartRequest) (*dto.CartResponse, error)
+	UpdateCartItem(ctx context.Context, id string, input dto.UpdateCartItemRequest) (*dto.CartResponse, error)
 	RemoveFromCart(ctx context.Context, id string) (bool, error)
 	CreateOrder(ctx context.Context) (*dto.OrderResponse, error)
 }
@@ -219,8 +210,6 @@ type OrderResolver interface {
 }
 type OrderItemResolver interface {
 	ID(ctx context.Context, obj *dto.OrderItemResponse) (string, error)
-
-	Quantitiy(ctx context.Context, obj *dto.OrderItemResponse) (int, error)
 }
 type ProductResolver interface {
 	ID(ctx context.Context, obj *dto.ProductResponse) (string, error)
@@ -240,44 +229,6 @@ type QueryResolver interface {
 }
 type UserResolver interface {
 	ID(ctx context.Context, obj *dto.UserResponse) (string, error)
-}
-
-type AddToCartInputResolver interface {
-	ProductID(ctx context.Context, obj *dto.RefreshTokenRequest, data uint) error
-	Quantitiy(ctx context.Context, obj *dto.RefreshTokenRequest, data int) error
-}
-type CreateCategoryInputResolver interface {
-	Name(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Description(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-}
-type CreateProductInputResolver interface {
-	CategoryID(ctx context.Context, obj *dto.RefreshTokenRequest, data uint) error
-	Name(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Description(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Price(ctx context.Context, obj *dto.RefreshTokenRequest, data float64) error
-	Stock(ctx context.Context, obj *dto.RefreshTokenRequest, data int) error
-	Sku(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-}
-type UpdateCartItemInputResolver interface {
-	Quantitiy(ctx context.Context, obj *dto.RefreshTokenRequest, data int) error
-}
-type UpdateCategoryInputResolver interface {
-	Name(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Description(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	IsActive(ctx context.Context, obj *dto.RefreshTokenRequest, data *bool) error
-}
-type UpdateProductInputResolver interface {
-	CategoryID(ctx context.Context, obj *dto.RefreshTokenRequest, data uint) error
-	Name(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Description(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Price(ctx context.Context, obj *dto.RefreshTokenRequest, data float64) error
-	Stock(ctx context.Context, obj *dto.RefreshTokenRequest, data int) error
-	IsActive(ctx context.Context, obj *dto.RefreshTokenRequest, data *bool) error
-}
-type UpdateProfileInputResolver interface {
-	FirstName(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	LastName(ctx context.Context, obj *dto.RefreshTokenRequest, data string) error
-	Phone(ctx context.Context, obj *dto.RefreshTokenRequest, data *string) error
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -354,12 +305,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.CartItem.Product(childComplexity), true
-	case "CartItem.quantitiy":
-		if e.ComplexityRoot.CartItem.Quantitiy == nil {
+	case "CartItem.quantity":
+		if e.ComplexityRoot.CartItem.Quantity == nil {
 			break
 		}
 
-		return e.ComplexityRoot.CartItem.Quantitiy(childComplexity), true
+		return e.ComplexityRoot.CartItem.Quantity(childComplexity), true
 	case "CartItem.subtotal":
 		if e.ComplexityRoot.CartItem.Subtotal == nil {
 			break
@@ -402,7 +353,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.AddToCart(childComplexity, args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.AddToCart(childComplexity, args["input"].(dto.AddToCartRequest)), true
 	case "Mutation.createCategory":
 		if e.ComplexityRoot.Mutation.CreateCategory == nil {
 			break
@@ -413,7 +364,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.CreateCategory(childComplexity, args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.CreateCategory(childComplexity, args["input"].(dto.CreateCategoryRequest)), true
 	case "Mutation.createOrder":
 		if e.ComplexityRoot.Mutation.CreateOrder == nil {
 			break
@@ -430,7 +381,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.CreateProduct(childComplexity, args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.CreateProduct(childComplexity, args["input"].(dto.CreateProductRequest)), true
 	case "Mutation.deleteCategory":
 		if e.ComplexityRoot.Mutation.DeleteCategory == nil {
 			break
@@ -518,7 +469,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateCartItem(childComplexity, args["id"].(string), args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.UpdateCartItem(childComplexity, args["id"].(string), args["input"].(dto.UpdateCartItemRequest)), true
 	case "Mutation.updateCategory":
 		if e.ComplexityRoot.Mutation.UpdateCategory == nil {
 			break
@@ -529,7 +480,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateCategory(childComplexity, args["id"].(string), args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.UpdateCategory(childComplexity, args["id"].(string), args["input"].(dto.UpdateCategoryRequest)), true
 	case "Mutation.updateProduct":
 		if e.ComplexityRoot.Mutation.UpdateProduct == nil {
 			break
@@ -540,7 +491,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["input"].(dto.UpdateProductRequest)), true
 	case "Mutation.updateProfile":
 		if e.ComplexityRoot.Mutation.UpdateProfile == nil {
 			break
@@ -551,7 +502,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.UpdateProfile(childComplexity, args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.UpdateProfile(childComplexity, args["input"].(dto.UpdateProfileRequest)), true
 
 	case "Order.created_at":
 		if e.ComplexityRoot.Order.CreatedAt == nil {
@@ -628,12 +579,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.OrderItem.Product(childComplexity), true
-	case "OrderItem.quantitiy":
-		if e.ComplexityRoot.OrderItem.Quantitiy == nil {
+	case "OrderItem.quantity":
+		if e.ComplexityRoot.OrderItem.Quantity == nil {
 			break
 		}
 
-		return e.ComplexityRoot.OrderItem.Quantitiy(childComplexity), true
+		return e.ComplexityRoot.OrderItem.Quantity(childComplexity), true
 
 	case "PageInfo.limit":
 		if e.ComplexityRoot.PageInfo.Limit == nil {
@@ -1020,8 +971,8 @@ func (ec *executionContext) childFields_CartItem(ctx context.Context, field grap
 		return ec.fieldContext_CartItem_id(ctx, field)
 	case "product":
 		return ec.fieldContext_CartItem_product(ctx, field)
-	case "quantitiy":
-		return ec.fieldContext_CartItem_quantitiy(ctx, field)
+	case "quantity":
+		return ec.fieldContext_CartItem_quantity(ctx, field)
 	case "subtotal":
 		return ec.fieldContext_CartItem_subtotal(ctx, field)
 	}
@@ -1084,8 +1035,8 @@ func (ec *executionContext) childFields_OrderItem(ctx context.Context, field gra
 		return ec.fieldContext_OrderItem_id(ctx, field)
 	case "product":
 		return ec.fieldContext_OrderItem_product(ctx, field)
-	case "quantitiy":
-		return ec.fieldContext_OrderItem_quantitiy(ctx, field)
+	case "quantity":
+		return ec.fieldContext_OrderItem_quantity(ctx, field)
 	case "price":
 		return ec.fieldContext_OrderItem_price(ctx, field)
 	}
@@ -1304,8 +1255,8 @@ func (ec *executionContext) field_Mutation_addToCart_args(ctx context.Context, r
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNAddToCartInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.AddToCartRequest, error) {
+			return ec.unmarshalNAddToCartInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐAddToCartRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1318,8 +1269,8 @@ func (ec *executionContext) field_Mutation_createCategory_args(ctx context.Conte
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNCreateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.CreateCategoryRequest, error) {
+			return ec.unmarshalNCreateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐCreateCategoryRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1332,8 +1283,8 @@ func (ec *executionContext) field_Mutation_createProduct_args(ctx context.Contex
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNCreateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.CreateProductRequest, error) {
+			return ec.unmarshalNCreateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐCreateProductRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1452,8 +1403,8 @@ func (ec *executionContext) field_Mutation_updateCartItem_args(ctx context.Conte
 	}
 	args["id"] = arg0
 	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNUpdateCartItemInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.UpdateCartItemRequest, error) {
+			return ec.unmarshalNUpdateCartItemInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateCartItemRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1474,8 +1425,8 @@ func (ec *executionContext) field_Mutation_updateCategory_args(ctx context.Conte
 	}
 	args["id"] = arg0
 	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNUpdateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.UpdateCategoryRequest, error) {
+			return ec.unmarshalNUpdateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateCategoryRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1496,8 +1447,8 @@ func (ec *executionContext) field_Mutation_updateProduct_args(ctx context.Contex
 	}
 	args["id"] = arg0
 	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNUpdateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.UpdateProductRequest, error) {
+			return ec.unmarshalNUpdateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateProductRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1510,8 +1461,8 @@ func (ec *executionContext) field_Mutation_updateProfile_args(ctx context.Contex
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNUpdateProfileInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+		func(ctx context.Context, v any) (dto.UpdateProfileRequest, error) {
+			return ec.unmarshalNUpdateProfileInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateProfileRequest(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -1900,16 +1851,16 @@ func (ec *executionContext) fieldContext_CartItem_product(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _CartItem_quantitiy(ctx context.Context, field graphql.CollectedField, obj *dto.CartItemResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _CartItem_quantity(ctx context.Context, field graphql.CollectedField, obj *dto.CartItemResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_CartItem_quantitiy(ctx, field)
+			return ec.fieldContext_CartItem_quantity(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.CartItem().Quantitiy(ctx, obj)
+			return obj.Quantity, nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
@@ -1919,8 +1870,8 @@ func (ec *executionContext) _CartItem_quantitiy(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_CartItem_quantitiy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("CartItem", field, true, true, errors.New("field of type Int does not have child fields"))
+func (ec *executionContext) fieldContext_CartItem_quantity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("CartItem", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _CartItem_subtotal(ctx context.Context, field graphql.CollectedField, obj *dto.CartItemResponse) (ret graphql.Marshaler) {
@@ -2224,7 +2175,7 @@ func (ec *executionContext) _Mutation_updateProfile(ctx context.Context, field g
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateProfile(ctx, fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().UpdateProfile(ctx, fc.Args["input"].(dto.UpdateProfileRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.UserResponse) graphql.Marshaler {
@@ -2268,7 +2219,7 @@ func (ec *executionContext) _Mutation_createCategory(ctx context.Context, field 
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().CreateCategory(ctx, fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().CreateCategory(ctx, fc.Args["input"].(dto.CreateCategoryRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.CategoryResponse) graphql.Marshaler {
@@ -2312,7 +2263,7 @@ func (ec *executionContext) _Mutation_updateCategory(ctx context.Context, field 
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateCategory(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().UpdateCategory(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.UpdateCategoryRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.CategoryResponse) graphql.Marshaler {
@@ -2400,7 +2351,7 @@ func (ec *executionContext) _Mutation_createProduct(ctx context.Context, field g
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().CreateProduct(ctx, fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().CreateProduct(ctx, fc.Args["input"].(dto.CreateProductRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.ProductResponse) graphql.Marshaler {
@@ -2444,7 +2395,7 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateProduct(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().UpdateProduct(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.UpdateProductRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.ProductResponse) graphql.Marshaler {
@@ -2532,7 +2483,7 @@ func (ec *executionContext) _Mutation_addToCart(ctx context.Context, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().AddToCart(ctx, fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().AddToCart(ctx, fc.Args["input"].(dto.AddToCartRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.CartResponse) graphql.Marshaler {
@@ -2576,7 +2527,7 @@ func (ec *executionContext) _Mutation_updateCartItem(ctx context.Context, field 
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().UpdateCartItem(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().UpdateCartItem(ctx, fc.Args["id"].(string), fc.Args["input"].(dto.UpdateCartItemRequest))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *dto.CartResponse) graphql.Marshaler {
@@ -2984,16 +2935,16 @@ func (ec *executionContext) fieldContext_OrderItem_product(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _OrderItem_quantitiy(ctx context.Context, field graphql.CollectedField, obj *dto.OrderItemResponse) (ret graphql.Marshaler) {
+func (ec *executionContext) _OrderItem_quantity(ctx context.Context, field graphql.CollectedField, obj *dto.OrderItemResponse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OrderItem_quantitiy(ctx, field)
+			return ec.fieldContext_OrderItem_quantity(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.OrderItem().Quantitiy(ctx, obj)
+			return obj.Quantity, nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
@@ -3003,8 +2954,8 @@ func (ec *executionContext) _OrderItem_quantitiy(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_OrderItem_quantitiy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OrderItem", field, true, true, errors.New("field of type Int does not have child fields"))
+func (ec *executionContext) fieldContext_OrderItem_quantity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("OrderItem", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _OrderItem_price(ctx context.Context, field graphql.CollectedField, obj *dto.OrderItemResponse) (ret graphql.Marshaler) {
@@ -5126,8 +5077,8 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputAddToCartInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputAddToCartInput(ctx context.Context, obj any) (dto.AddToCartRequest, error) {
+	var it dto.AddToCartRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5137,7 +5088,7 @@ func (ec *executionContext) unmarshalInputAddToCartInput(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"product_id", "quantitiy"}
+	fieldsInOrder := [...]string{"product_id", "quantity"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5150,25 +5101,21 @@ func (ec *executionContext) unmarshalInputAddToCartInput(ctx context.Context, ob
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.AddToCartInput().ProductID(ctx, &it, data); err != nil {
-				return it, err
-			}
-		case "quantitiy":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantitiy"))
+			it.ProductID = data
+		case "quantity":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.AddToCartInput().Quantitiy(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Quantity = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreateCategoryInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputCreateCategoryInput(ctx context.Context, obj any) (dto.CreateCategoryRequest, error) {
+	var it dto.CreateCategoryRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5191,25 +5138,21 @@ func (ec *executionContext) unmarshalInputCreateCategoryInput(ctx context.Contex
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateCategoryInput().Name(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Name = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateCategoryInput().Description(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Description = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context, obj any) (dto.CreateProductRequest, error) {
+	var it dto.CreateProductRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5232,54 +5175,42 @@ func (ec *executionContext) unmarshalInputCreateProductInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().CategoryID(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.CategoryID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().Name(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Name = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().Description(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Description = data
 		case "price":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
 			data, err := ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().Price(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Price = data
 		case "stock":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stock"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().Stock(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Stock = data
 		case "sku":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sku"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.CreateProductInput().Sku(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.SKU = data
 		}
 	}
 	return it, nil
@@ -5410,8 +5341,8 @@ func (ec *executionContext) unmarshalInputRegisterInput(ctx context.Context, obj
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateCartItemInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputUpdateCartItemInput(ctx context.Context, obj any) (dto.UpdateCartItemRequest, error) {
+	var it dto.UpdateCartItemRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5421,29 +5352,27 @@ func (ec *executionContext) unmarshalInputUpdateCartItemInput(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"quantitiy"}
+	fieldsInOrder := [...]string{"quantity"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "quantitiy":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantitiy"))
+		case "quantity":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateCartItemInput().Quantitiy(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Quantity = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateCategoryInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputUpdateCategoryInput(ctx context.Context, obj any) (dto.UpdateCategoryRequest, error) {
+	var it dto.UpdateCategoryRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5466,34 +5395,28 @@ func (ec *executionContext) unmarshalInputUpdateCategoryInput(ctx context.Contex
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateCategoryInput().Name(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Name = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateCategoryInput().Description(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Description = data
 		case "is_active":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_active"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateCategoryInput().IsActive(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.IsActive = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context, obj any) (dto.UpdateProductRequest, error) {
+	var it dto.UpdateProductRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5516,61 +5439,49 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().CategoryID(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.CategoryID = data
 		case "name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().Name(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Name = data
 		case "description":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().Description(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Description = data
 		case "price":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
 			data, err := ec.unmarshalNFloat2float64(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().Price(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Price = data
 		case "stock":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stock"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().Stock(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Stock = data
 		case "is_active":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("is_active"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProductInput().IsActive(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.IsActive = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUpdateProfileInput(ctx context.Context, obj any) (dto.RefreshTokenRequest, error) {
-	var it dto.RefreshTokenRequest
+func (ec *executionContext) unmarshalInputUpdateProfileInput(ctx context.Context, obj any) (dto.UpdateProfileRequest, error) {
+	var it dto.UpdateProfileRequest
 	if obj == nil {
 		return it, nil
 	}
@@ -5593,27 +5504,21 @@ func (ec *executionContext) unmarshalInputUpdateProfileInput(ctx context.Context
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProfileInput().FirstName(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.FirstName = data
 		case "last_name":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("last_name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProfileInput().LastName(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.LastName = data
 		case "phone":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("phone"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			if err = ec.Resolvers.UpdateProfileInput().Phone(ctx, &it, data); err != nil {
-				return it, err
-			}
+			it.Phone = data
 		}
 	}
 	return it, nil
@@ -5849,44 +5754,11 @@ func (ec *executionContext) _CartItem(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "quantitiy":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._CartItem_quantitiy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+		case "quantity":
+			out.Values[i] = ec._CartItem_quantity(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.IsDeferred() {
-				deferredFieldSet.AddField(field)
-				fieldIndex := len(deferredFieldSet.Values) - 1
-				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, deferredFieldSet)
-				})
-
-				for _, deferrable := range field.Deferrables {
-					view, ok := deferLabelToView[deferrable.Label]
-					if !ok {
-						view = deferredFieldSet.NewView()
-						deferLabelToView[deferrable.Label] = view
-					}
-					view.AddIndices(fieldIndex)
-				}
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "subtotal":
 			out.Values[i] = ec._CartItem_subtotal(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -6410,44 +6282,11 @@ func (ec *executionContext) _OrderItem(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
-		case "quantitiy":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._OrderItem_quantitiy(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+		case "quantity":
+			out.Values[i] = ec._OrderItem_quantity(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.IsDeferred() {
-				deferredFieldSet.AddField(field)
-				fieldIndex := len(deferredFieldSet.Values) - 1
-				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, deferredFieldSet)
-				})
-
-				for _, deferrable := range field.Deferrables {
-					view, ok := deferLabelToView[deferrable.Label]
-					if !ok {
-						view = deferredFieldSet.NewView()
-						deferLabelToView[deferrable.Label] = view
-					}
-					view.AddIndices(fieldIndex)
-				}
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "price":
 			out.Values[i] = ec._OrderItem_price(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -7545,7 +7384,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNAddToCartInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNAddToCartInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐAddToCartRequest(ctx context.Context, v any) (dto.AddToCartRequest, error) {
 	res, err := ec.unmarshalInputAddToCartInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7636,12 +7475,12 @@ func (ec *executionContext) marshalNCategory2ᚖgithubᚗcomᚋOleksUMDᚋecomme
 	return ec._Category(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNCreateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐCreateCategoryRequest(ctx context.Context, v any) (dto.CreateCategoryRequest, error) {
 	res, err := ec.unmarshalInputCreateCategoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNCreateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐCreateProductRequest(ctx context.Context, v any) (dto.CreateProductRequest, error) {
 	res, err := ec.unmarshalInputCreateProductInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7887,22 +7726,22 @@ func (ec *executionContext) marshalNUInt2uint(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateCartItemInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNUpdateCartItemInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateCartItemRequest(ctx context.Context, v any) (dto.UpdateCartItemRequest, error) {
 	res, err := ec.unmarshalInputUpdateCartItemInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNUpdateCategoryInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateCategoryRequest(ctx context.Context, v any) (dto.UpdateCategoryRequest, error) {
 	res, err := ec.unmarshalInputUpdateCategoryInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNUpdateProductInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateProductRequest(ctx context.Context, v any) (dto.UpdateProductRequest, error) {
 	res, err := ec.unmarshalInputUpdateProductInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
+func (ec *executionContext) unmarshalNUpdateProfileInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUpdateProfileRequest(ctx context.Context, v any) (dto.UpdateProfileRequest, error) {
 	res, err := ec.unmarshalInputUpdateProfileInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

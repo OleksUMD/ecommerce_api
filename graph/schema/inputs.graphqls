@@ -52,9 +52,9 @@ input UpdateProductInput {
 
 input AddToCartInput {
   product_id: UInt!
-  quantitiy: Int!
+  quantity: Int!
 }
 
 input UpdateCartItemInput {
-  quantitiy: Int!
+  quantity: Int!
 }

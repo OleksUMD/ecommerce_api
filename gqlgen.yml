@@ -46,19 +46,19 @@ models:
   RefreshTokenInput:
     model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
   UpdateProfileInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.UpdateProfileRequest
   CreateCategoryInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.CreateCategoryRequest
   UpdateCategoryInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.UpdateCategoryRequest
   UpdateCartItemInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.UpdateCartItemRequest
   CreateProductInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.CreateProductRequest
   UpdateProductInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.UpdateProductRequest
   AddToCartInput:
-    model: github.com/OleksUMD/ecommerce_api/internal/dto.RefreshTokenRequest
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.AddToCartRequest
   ID:
     model: github.com/99designs/gqlgen/graphql.String
   UInt:

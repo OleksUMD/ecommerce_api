@@ -28,11 +28,6 @@ func (r *cartItemResolver) ID(ctx context.Context, obj *dto.CartItemResponse) (s
 	return fmt.Sprintf("%d", obj.ID), nil
 }
 
-// Quantitiy is the resolver for the quantitiy field.
-func (r *cartItemResolver) Quantitiy(ctx context.Context, obj *dto.CartItemResponse) (int, error) {
-	panic(fmt.Errorf("not implemented: Quantitiy - quantitiy"))
-}
-
 // ID is the resolver for the id field.
 func (r *categoryResolver) ID(ctx context.Context, obj *dto.CategoryResponse) (string, error) {
 	return fmt.Sprintf("%d", obj.ID), nil

@@ -46,7 +46,7 @@ type Product {
 type CartItem {
   id: ID!
   product: Product!
-  quantitiy: Int!
+  quantity: Int!
   subtotal: Float!
 }
 
@@ -60,7 +60,7 @@ type Cart {
 type OrderItem {
   id: ID!
   product: Product!
-  quantitiy: Int!
+  quantity: Int!
   price: Float!
 }
 
