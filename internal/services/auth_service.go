@@ -10,34 +10,40 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/events"
 	"github.com/OleksUMD/ecommerce_api/internal/models"
 	"github.com/OleksUMD/ecommerce_api/internal/notifications"
+	"github.com/OleksUMD/ecommerce_api/internal/repositories"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
-	"gorm.io/gorm"
 )
 
 type AuthService struct {
-	db             *gorm.DB
+	userRepo       repositories.UserRepositoryInterface
+	cartRepo       repositories.CartRepositoryInterface
 	config         *config.Config
 	eventPublisher events.Publisher
 }
 
-func NewAuthService(db *gorm.DB, config *config.Config, eventPublisher events.Publisher) *AuthService {
+func NewAuthService(
+	userRepo repositories.UserRepositoryInterface,
+	cartRepo repositories.CartRepositoryInterface,
+	config *config.Config,
+	eventPublisher events.Publisher,
+) *AuthService {
 	return &AuthService{
-		db:             db,
+		cartRepo:       cartRepo,
+		userRepo:       userRepo,
 		config:         config,
 		eventPublisher: eventPublisher,
 	}
 }
 
 func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, error) {
-	var existingUser models.User
-	if err := s.db.Where("email= ?", req.Email).First(&existingUser).Error; err == nil {
+	exists, _ := s.userRepo.GetByEmail(req.Email)
+	if exists != nil {
 		return nil, errors.New("this email is already registered")
 	}
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		return nil, err
 	}
-
 	user := models.User{
 		Email:     req.Email,
 		Password:  hashedPassword,
@@ -46,26 +52,26 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
 		Phone:     req.Phone,
 		Role:      models.UserRoleCustomer,
 	}
-	if err := s.db.Create(&user).Error; err != nil {
+	if err := s.userRepo.Create(&user); err != nil {
 		return nil, err
 	}
 
 	cart := models.Cart{UserID: user.ID}
-	if err := s.db.Create(&cart).Error; err != nil {
+	if err := s.cartRepo.Create(&cart); err != nil {
 		return nil, err
 	}
 	return s.generateAuthResponse(&user)
 }
 
 func (s *AuthService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
-	var user models.User
-	if err := s.db.Where("email= ? AND is_active = ?", req.Email, true).First(&user).Error; err != nil {
+	user, err := s.userRepo.GetByEmailAndActive(req.Email, true)
+	if err != nil {
 		return nil, errors.New("invalid credentials")
 	}
 	if !utils.CheckPassword(req.Password, user.Password) {
 		return nil, errors.New("invalid credentials")
 	}
-	return s.generateAuthResponse(&user)
+	return s.generateAuthResponse(user)
 }
 
 func (s *AuthService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthResponse, error) {
@@ -73,22 +79,20 @@ func (s *AuthService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthRespo
 	if err != nil {
 		return nil, errors.New("invalid token")
 	}
-	var refreshToken models.RefreshToken
-	if err := s.db.Where(
-		"token = ? AND expires_at > ?", req.RefreshToken, time.Now(),
-	).Find(&refreshToken).Error; err != nil {
+	refreshToken, err := s.userRepo.GetValidRefreshToken(req.RefreshToken)
+	if err != nil {
 		return nil, errors.New("invalid token")
 	}
-	var user models.User
-	if err := s.db.First(&user, claims.UserID).Error; err != nil {
+	user, err := s.userRepo.GetByID(claims.UserID)
+	if err != nil {
 		return nil, errors.New("invalid token")
 	}
-	s.db.Delete(&refreshToken)
-	return s.generateAuthResponse(&user)
+	s.userRepo.DeleteRefreshTokenByID(refreshToken.ID)
+	return s.generateAuthResponse(user)
 }
 
 func (s *AuthService) Logout(refreshToken string) error {
-	return s.db.Where("token = ?", refreshToken).Delete(&models.RefreshToken{}).Error
+	return s.userRepo.DeleteRefreshToken(refreshToken)
 }
 
 func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse, error) {
@@ -106,7 +110,7 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(s.config.JWT.RefreshtokenExpires),
 	}
-	s.db.Create(&refreshTokenModel)
+	s.userRepo.CreateRefreshToken(&refreshTokenModel)
 	err = s.eventPublisher.Publish(notifications.UserLoggedIn, user, map[string]string{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate auth event message: %w", err)

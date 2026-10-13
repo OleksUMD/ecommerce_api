@@ -17,6 +17,7 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/interfaces"
 	"github.com/OleksUMD/ecommerce_api/internal/logger"
 	"github.com/OleksUMD/ecommerce_api/internal/providers"
+	"github.com/OleksUMD/ecommerce_api/internal/repositories"
 	"github.com/OleksUMD/ecommerce_api/internal/server"
 	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
@@ -69,7 +70,14 @@ func main() {
 		return
 	}
 	gin.SetMode(cfg.Server.GinMode)
-	authService := services.NewAuthService(db, cfg, eventPublisher)
+	userRepo := repositories.NewUserRepository(db)
+	cartRepo := repositories.NewCartRepository(db)
+	authService := services.NewAuthService(
+		userRepo,
+		cartRepo,
+		cfg,
+		eventPublisher,
+	)
 	userService := services.NewUserService(db, cfg)
 	productService := services.NewProductService(db, cfg)
 
