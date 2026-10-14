@@ -276,3 +276,35 @@ func (s *Server) uploadProductImage(c *gin.Context) {
 
 	utils.SuccessResponse(c, "Image uploaded successfully", map[string]string{"url": url})
 }
+
+// @Summary Search through all products
+// @Description Retrieve paginated list of active products
+// @Tags Products
+// @Produce json
+// @Param q query string true "Search query"
+// @Param page query int false "Page number" default(1)
+// @Param limit query int false "Items per page" default(10)
+// @Param category_id query int false "Filter by category ID"
+// @Param min_price query number false "Minimum price filter"
+// @Param max_price query number false "Maximum price filter"
+// @Success 200 {object} utils.PaginatedResponse{data=[]dto.ProductSearchResult} "Search results"
+// @Failure 400 {object} utils.Response "Invalid query parameters"
+// @Failure 500 {object} utils.Response "Internal server error"
+// @Router /search [get]
+func (s *Server) searchProducts(c *gin.Context) {
+	var req dto.SearchProductRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		utils.BadRequestResponse(c, "Invalid search parameters", err)
+		return
+	}
+
+	response, meta, err := s.productService.SearchProducts(&req)
+
+	if err != nil {
+		s.logger.Error().Err(err).Msg("Search for products failed")
+		utils.BadRequestResponse(c, "Search for products failed", err)
+		return
+	}
+	utils.PaginatedSuccessResponse(c, "Products retrieved successfully", response, *meta)
+}

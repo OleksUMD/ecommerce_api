@@ -34,6 +34,7 @@ type ProductServiceInterface interface {
 	DeleteProduct(id uint) error
 	AddProductImage(productID uint, url, altText string) error
 	convertToProductResponse(product *models.Product) dto.ProductResponse
+	SearchProducts(req *dto.SearchProductRequest) ([]dto.ProductSearchResult, *utils.PaginationMeta, error)
 }
 
 type CartServiceInterface interface {
