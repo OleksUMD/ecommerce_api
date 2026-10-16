@@ -109,7 +109,7 @@ func (s *Server) logout(c *gin.Context) {
 // @Failure 404 {object} utils.Response "User not found"
 // @Router /users/profile [get]
 func (s *Server) getProfile(c *gin.Context) {
-	userID := c.GetUint("user_id")
+	userID := c.GetUint(utils.UserIDKey)
 	response, err := s.userService.GetProfile(userID)
 	if err != nil {
 		utils.NotFoundResponse(c, "User  not found", err)
@@ -136,7 +136,7 @@ func (s *Server) updateProfile(c *gin.Context) {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	userID := c.GetUint("user_id")
+	userID := c.GetUint(utils.UserIDKey)
 	response, err := s.userService.UpdateProfile(userID, &req)
 	if err != nil {
 		utils.BadRequestResponse(c, "Failed to update profile", err)

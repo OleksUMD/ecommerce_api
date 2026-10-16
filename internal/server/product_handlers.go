@@ -142,16 +142,29 @@ func (s *Server) createProduct(c *gin.Context) {
 // @Failure 500 {object} utils.Response "Internal server error"
 // @Router /products [get]
 func (s *Server) getProducts(c *gin.Context) {
-	page, err := strconv.Atoi(c.Query("page"))
-	if err != nil {
-		utils.BadRequestResponse(c, "Get products failed", err)
-		return
+	var page, limit int
+	var err error
+	rawPage := c.Query("page")
+	rawLimit := c.Query("limit")
+	if rawPage != "" {
+		page, err = strconv.Atoi(rawPage)
+		if err != nil {
+			utils.BadRequestResponse(c, "Get products failed", err)
+			return
+		}
+	} else {
+		page = 1
 	}
-	limit, err := strconv.Atoi(c.Query("limit"))
-	if err != nil {
-		utils.BadRequestResponse(c, "Get products failed", err)
-		return
+	if rawLimit != "" {
+		limit, err = strconv.Atoi(rawLimit)
+		if err != nil {
+			utils.BadRequestResponse(c, "Get products failed", err)
+			return
+		}
+	} else {
+		limit = 20
 	}
+
 	response, meta, err := s.productService.GetProducts(page, limit)
 	if err != nil {
 		utils.BadRequestResponse(c, "Get products failed", err)

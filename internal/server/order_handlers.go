@@ -30,7 +30,7 @@ func (s *Server) getOrders(c *gin.Context) {
 		utils.BadRequestResponse(c, "Get orders failed", err)
 		return
 	}
-	userID := c.GetUint("user_id")
+	userID := c.GetUint(utils.UserIDKey)
 	response, meta, err := s.orderService.GetOrders(userID, page, limit)
 	if err != nil {
 		utils.BadRequestResponse(c, "Get orders failed", err)
@@ -56,7 +56,7 @@ func (s *Server) getOrder(c *gin.Context) {
 		utils.BadRequestResponse(c, "Get order failed", err)
 		return
 	}
-	userID := c.GetUint("user_id")
+	userID := c.GetUint(utils.UserIDKey)
 	response, err := s.orderService.GetOrder(userID, uint(orderID))
 	if err != nil {
 		utils.BadRequestResponse(c, "Get order failed", err)
@@ -75,7 +75,7 @@ func (s *Server) getOrder(c *gin.Context) {
 // @Failure 401 {object} utils.Response "Unauthorized"
 // @Router /orders [post]
 func (s *Server) createOrder(c *gin.Context) {
-	userID := c.GetUint("user_id")
+	userID := c.GetUint(utils.UserIDKey)
 	order, err := s.orderService.CreateOrder(userID)
 	if err != nil {
 		utils.BadRequestResponse(c, "Failed to create an order", err)
