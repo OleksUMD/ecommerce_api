@@ -15,6 +15,7 @@ help:
 	@echo " make docker-down              - Stop project in docker compose"
 	@echo " make docker-build-app         - Build app docker image"
 	@echo " make docker-build-notifier    - Build notifier docker image"
+	@echo " make docker-logs              - Show logs from API docker container"
 
 build:
 	@echo "Building all binaries"
@@ -64,3 +65,6 @@ docs-generate:
 
 graph-generate:
 	@go tool gqlgen generate
+
+docker-logs:
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env logs -f app
