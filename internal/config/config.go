@@ -17,6 +17,7 @@ type Config struct {
 	AWS      AWSConfig
 	Upload   UploadConfig
 	SMTP     SMTPConfig
+	Cache    CacheConfig
 }
 
 // ServerConfig is a container for server configuration
@@ -33,6 +34,14 @@ type DatabaseConfig struct {
 	Password string
 	Name     string
 	SSLMode  string
+}
+
+type CacheConfig struct {
+	Host     string
+	Port     string
+	Password string
+	AuthDB   int
+	CacheDB  int
 }
 
 // JWTConfig is a container for authentication settings
@@ -128,6 +137,14 @@ func Load() (*Config, error) {
 		From:     getEnv("SMTP_FROM", "noreply@shop.com"),
 	}
 
+	cache := CacheConfig{
+		Host:     getEnv("REDIS_HOST", "localhost"),
+		Port:     getEnv("REDIS_PORT", "6379"),
+		Password: getEnv("REDIS_PASS", ""),
+		AuthDB:   1,
+		CacheDB:  0,
+	}
+
 	config := &Config{}
 	config.Server = server
 	config.Database = database
@@ -135,6 +152,7 @@ func Load() (*Config, error) {
 	config.JWT = jwt
 	config.Upload = upload
 	config.SMTP = smtp
+	config.Cache = cache
 	return config, err
 }
 

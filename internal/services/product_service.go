@@ -66,7 +66,7 @@ func (s *ProductService) UpdateCategory(id uint, req *dto.UpdateCategoryRequest)
 		return nil, err
 	}
 	category.Name = req.Name
-	category.Description = req.Name
+	category.Description = req.Description
 	if req.IsActive != nil {
 		category.IsActive = *req.IsActive
 	}

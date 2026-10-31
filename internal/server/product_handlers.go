@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"strconv"
 
 	"github.com/OleksUMD/ecommerce_api/internal/dto"
@@ -42,10 +43,17 @@ func (s *Server) createCategory(c *gin.Context) {
 // @Failure 500 {object} utils.Response "Internal server error"
 // @Router /categories [get]
 func (s *Server) getCategories(c *gin.Context) {
-	response, err := s.productService.GetCategories()
+	response, err := s.cache.GetCategories(context.Background())
 	if err != nil {
-		utils.BadRequestResponse(c, "Get categories failed", err)
-		return
+		s.logger.Warn().Err(err).Msg("failed to retrieve categories from cache")
+	}
+	if len(response) == 0 {
+		response, err = s.productService.GetCategories()
+		if err != nil {
+			utils.BadRequestResponse(c, "Get categories failed", err)
+			return
+		}
+		s.cache.SetCategories(context.Background(), response)
 	}
 	utils.SuccessResponse(c, "Categories retrieved successfully", response)
 }
@@ -79,6 +87,7 @@ func (s *Server) updateCategory(c *gin.Context) {
 		utils.BadRequestResponse(c, "Update category failed", err)
 		return
 	}
+	s.cache.CleanCategories(context.Background())
 	utils.SuccessResponse(c, "Category updated successfully", response)
 }
 
@@ -103,6 +112,7 @@ func (s *Server) deleteCategory(c *gin.Context) {
 		utils.BadRequestResponse(c, "Delete category failed", err)
 		return
 	}
+	s.cache.CleanCategories(context.Background())
 	utils.SuccessNoContentResponse(c, "Category deleted successfully", nil)
 }
 

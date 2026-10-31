@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/database"
 	"github.com/OleksUMD/ecommerce_api/internal/events"
@@ -70,6 +71,12 @@ func main() {
 		return
 	}
 	gin.SetMode(cfg.Server.GinMode)
+	cacheService := cache.NewCache(cfg)
+	defer func() {
+		if err := cacheService.Close(); err != nil {
+			log.Error().Err(err).Msg("failed to close redis connection")
+		}
+	}()
 	userRepo := repositories.NewUserRepository(db)
 	cartRepo := repositories.NewCartRepository(db)
 	authService := services.NewAuthService(
@@ -100,6 +107,7 @@ func main() {
 		uploadService,
 		cartService,
 		orderService,
+		cacheService,
 	)
 	router := srv.SetupRoutes()
 	httpServer := &http.Server{

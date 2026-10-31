@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	_ "github.com/OleksUMD/ecommerce_api/docs"
+	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,7 @@ import (
 type Server struct {
 	config         *config.Config
 	logger         zerolog.Logger
+	cache          cache.CacheInterface
 	authService    services.AuthServiceInterface
 	productService services.ProductServiceInterface
 	userService    services.UserServiceInterface
@@ -36,10 +38,12 @@ func New(
 	uploadService services.UploadServiceInterface,
 	cartService services.CartServiceInterface,
 	orderService services.OrderServiceInterface,
+	cache cache.CacheInterface,
 ) *Server {
 	return &Server{
 		config:         cfg,
 		logger:         logger,
+		cache:          cache,
 		authService:    authService,
 		productService: productService,
 		userService:    userService,
