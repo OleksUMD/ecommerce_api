@@ -56,14 +56,23 @@ func (r *UserRepository) Delete(id uint) error {
 }
 
 func (r *UserRepository) CreateRefreshToken(token *models.RefreshToken) error {
-	var err error
-	return err
+	return r.db.Create(&token).Error
 }
 
 func (r *UserRepository) GetValidRefreshToken(token string) (*models.RefreshToken, error) {
 	var refreshToken models.RefreshToken
 	if err := r.db.Where(
 		"token = ? AND expires_at > ?", token, time.Now(),
+	).Find(&refreshToken).Error; err != nil {
+		return nil, errors.New("invalid token")
+	}
+	return &refreshToken, nil
+}
+
+func (r *UserRepository) GetRefreshTokenByUserID(userID uint) (*models.RefreshToken, error) {
+	var refreshToken models.RefreshToken
+	if err := r.db.Where(
+		"user_id = ? AND expires_at > ?", userID, time.Now(),
 	).Find(&refreshToken).Error; err != nil {
 		return nil, errors.New("invalid token")
 	}
