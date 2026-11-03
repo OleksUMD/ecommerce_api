@@ -1,6 +1,10 @@
 package server
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/dto"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -12,7 +16,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "User registration data"
-// @Success 201 {object} utils.Response{data=dto.AuthResponse} "User registered successfully"
+// @Success 201 {object} utils.Response{data=dto.UserResponse} "User registered successfully"
 // @Failure 400 {object} utils.Response "Invalid request dtaa or user already exists"
 // @Router /auth/register [post]
 func (s *Server) register(c *gin.Context) {
@@ -26,7 +30,11 @@ func (s *Server) register(c *gin.Context) {
 		utils.BadRequestResponse(c, "Registration failed", err)
 		return
 	}
-	utils.CreatedResponse(c, "User registered successfully", response)
+	utils.CreatedResponse(
+		c,
+		fmt.Sprintf("Check the email(%s) to finish the registration", response.Email),
+		response,
+	)
 }
 
 // @Summery User Login
@@ -143,4 +151,52 @@ func (s *Server) updateProfile(c *gin.Context) {
 		return
 	}
 	utils.SuccessResponse(c, "Profile updated successfully", response)
+}
+
+// @Summery Verify an email during registration
+// @Description Create a new user account with email and password
+// @Tags Authentication
+// @Param token path string true "Temporary verification token"
+// @Success 200 {object} utils.Response{data=nil} "User's email verified successfully"
+// @Failure 404 {object} utils.Response "Invalid or expired verification link"
+// @Router /auth/verify/{token} [get]
+func (s *Server) verifyEmail(c *gin.Context) {
+	token := c.Param("token")
+	if token == "" {
+		s.logger.Warn().Msg("invalid attempt to verify an email")
+		utils.NotFoundResponse(c, "Not found", nil)
+		return
+	}
+	err := s.authService.VerifyEmail(token)
+	if err != nil {
+		if !errors.Is(err, cache.ErrRedisNotFound) {
+			s.logger.Err(err).Msg("invalid attempt to verify an email")
+		}
+		utils.NotFoundResponse(c, "Email verification failed due to expired link. Make request to resubmit another one.", nil)
+		return
+	}
+	utils.SuccessResponse(c, "User's email verified successfully", nil)
+}
+
+// @Summery Generate new verification link and send it to the user's email
+// @Description Send a temporary confirmation link to the user's email
+// @Tags User
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} utils.Response{data=dto.UserResponse} "Verification link has been sent successfully"
+// @Failure 401 {object} utils.Response "Authorization required"
+// @Failure 404 {object} utils.Response "User not found"
+// @Router /users/verify-email [post]
+func (s *Server) resendVerificationLink(c *gin.Context) {
+	userID := c.GetUint(utils.UserIDKey)
+	response, err := s.authService.ResubmitVerificationLink(userID)
+	if err != nil {
+		utils.NotFoundResponse(c, "User not found", err)
+		return
+	}
+	utils.SuccessResponse(
+		c,
+		fmt.Sprintf("Check the email(%s) to finish the registration", response.Email),
+		response,
+	)
 }

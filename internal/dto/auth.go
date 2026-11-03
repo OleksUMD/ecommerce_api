@@ -49,3 +49,8 @@ type UpdateProfileRequest struct {
 	LastName  string `json:"last_name" binding:"required"`
 	Phone     string `json:"phone"`
 }
+
+type RegisterResponse struct {
+	User    UserResponse `json:"user"`
+	Message string       `json:"message"`
+}

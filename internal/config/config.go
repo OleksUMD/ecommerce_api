@@ -22,6 +22,7 @@ type Config struct {
 
 // ServerConfig is a container for server configuration
 type ServerConfig struct {
+	Host    string
 	Port    string
 	GinMode string
 }
@@ -40,6 +41,7 @@ type CacheConfig struct {
 	Host     string
 	Port     string
 	Password string
+	AuthTTL  time.Duration
 	AuthDB   int
 	CacheDB  int
 }
@@ -98,8 +100,13 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	authTTL, err := strconv.Atoi(getEnv("AUTH_SESSION_TTL", "30"))
+	if err != nil {
+		return nil, err
+	}
 	server := ServerConfig{
 		Port:    getEnv("PORT", "8080"),
+		Host:    getEnv("HOST", "localhost"),
 		GinMode: getEnv("GIN_MODE", "release"),
 	}
 	database := DatabaseConfig{
@@ -141,6 +148,7 @@ func Load() (*Config, error) {
 		Host:     getEnv("REDIS_HOST", "localhost"),
 		Port:     getEnv("REDIS_PORT", "6379"),
 		Password: getEnv("REDIS_PASS", ""),
+		AuthTTL:  time.Duration(authTTL),
 		AuthDB:   1,
 		CacheDB:  0,
 	}

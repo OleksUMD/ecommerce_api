@@ -8,6 +8,7 @@ help:
 	@echo " make run                      - Run the application"
 	@echo " make dev                      - Run the application in development mode"
 	@echo " make lint                     - Run linter on the codebase"
+	@echo " make test                     - Run all available tests[TODO]"
 	@echo " make migrate-up               - Apply database migrations"
 	@echo " make migrate-down             - Rollback database migrations"
 	@echo " make docs-generate            - Generate Swagger API documentation"
@@ -16,6 +17,7 @@ help:
 	@echo " make docker-build-app         - Build app docker image"
 	@echo " make docker-build-notifier    - Build notifier docker image"
 	@echo " make docker-logs              - Show logs from API docker container"
+	@echo " make graph-generate           - Generate graphql resolvers"
 
 build:
 	@echo "Building all binaries"
@@ -36,6 +38,9 @@ dev:
 
 lint:
 	golangci-lint run ./...
+
+test:
+	@echo "The command has not been implemented yet"
 
 migrate-up:
 	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" up

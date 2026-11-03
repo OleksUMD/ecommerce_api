@@ -86,6 +86,8 @@ func processMessage(msg *message.Message, notifier *notifications.EmailNotifier)
 	switch eventType {
 	case notifications.UserLoggedIn:
 		return handleUserLoggedIn(msg, notifier)
+	case notifications.UserRegistered:
+		return handleUserRegistered(msg, notifier)
 	default:
 		log.Printf("Unknown event type: %s\n", eventType)
 		return nil
@@ -103,4 +105,13 @@ func handleUserLoggedIn(msg *message.Message, notifier *notifications.EmailNotif
 	}
 	log.Printf("Sending login notification to %s\n", userName)
 	return notifier.SendLoginNotification(user.Email, userName)
+}
+
+func handleUserRegistered(msg *message.Message, notifier *notifications.EmailNotifier) error {
+	var user models.UnverifiedUser
+	if err := json.Unmarshal(msg.Payload, &user); err != nil {
+		return err
+	}
+	log.Printf("[USER:%d] Sending email verification link to %s\n", user.UserID, user.Email)
+	return notifier.SendEmailVerificationLink(user.Email, user.UserName, user.Link)
 }

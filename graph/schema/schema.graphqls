@@ -9,7 +9,7 @@ type Query {
 }
 
 type Mutation {
-  register(input: RegisterInput!): AuthPayload!
+  register(input: RegisterInput!): User!
   login(input: LoginInput!): AuthPayload!
   refreshToken(input: RefreshTokenInput!): AuthPayload!
   logout(input: RefreshTokenInput!): Boolean!

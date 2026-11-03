@@ -102,3 +102,24 @@ The Shop Team`, userName,
 	}
 	return e.SendSimpleEmail(email)
 }
+
+func (e *EmailNotifier) SendEmailVerificationLink(userEmail, userName, tmpLink string) error {
+	body := fmt.Sprintf(
+		`Hello %s,
+
+You have successfully registered at our E-commerce shop.
+
+Please verify your email by clicking on the following link:
+ %s
+The link is valid during 30 minutes.
+Best Regards,
+The Shop Team`, userName, tmpLink,
+	)
+
+	email := &SimpleEmail{
+		To:      userEmail,
+		Subject: "Confirm Email",
+		Body:    body,
+	}
+	return e.SendSimpleEmail(email)
+}

@@ -2,7 +2,7 @@ package repositories
 
 import "github.com/OleksUMD/ecommerce_api/internal/models"
 
-type UserRepositoryInterface interface {
+type IUserRepository interface {
 	GetByEmail(email string) (*models.User, error)
 	GetByID(id uint) (*models.User, error)
 	GetByEmailAndActive(email string, isActive bool) (*models.User, error)
@@ -14,9 +14,11 @@ type UserRepositoryInterface interface {
 	GetValidRefreshToken(token string) (*models.RefreshToken, error)
 	DeleteRefreshToken(token string) error
 	DeleteRefreshTokenByID(id uint) error
+	SaveUnverifiedUser(token string, data *models.UnverifiedUser) error
+	VerifyUserEmail(token string) error
 }
 
-type CartRepositoryInterface interface {
+type ICartRepository interface {
 	GetByUserID(userID uint) (*models.Cart, error)
 	Create(cart *models.Cart) error
 	Update(cart *models.Cart) error

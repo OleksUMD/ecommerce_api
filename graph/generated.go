@@ -203,7 +203,7 @@ type CategoryResolver interface {
 	ID(ctx context.Context, obj *dto.CategoryResponse) (string, error)
 }
 type MutationResolver interface {
-	Register(ctx context.Context, input dto.RegisterRequest) (*dto.AuthResponse, error)
+	Register(ctx context.Context, input dto.RegisterRequest) (*dto.UserResponse, error)
 	Login(ctx context.Context, input dto.LoginRequest) (*dto.AuthResponse, error)
 	RefreshToken(ctx context.Context, input dto.RefreshTokenRequest) (*dto.AuthResponse, error)
 	Logout(ctx context.Context, input dto.RefreshTokenRequest) (bool, error)
@@ -2267,8 +2267,8 @@ func (ec *executionContext) _Mutation_register(ctx context.Context, field graphq
 			return ec.Resolvers.Mutation().Register(ctx, fc.Args["input"].(dto.RegisterRequest))
 		},
 		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v *dto.AuthResponse) graphql.Marshaler {
-			return ec.marshalNAuthPayload2ᚖgithubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐAuthResponse(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v *dto.UserResponse) graphql.Marshaler {
+			return ec.marshalNUser2ᚖgithubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUserResponse(ctx, selections, v)
 		},
 		true,
 		true,
@@ -2281,7 +2281,7 @@ func (ec *executionContext) fieldContext_Mutation_register(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_AuthPayload(ctx, field)
+			return ec.childFields_User(ctx, field)
 		},
 	}
 	defer func() {

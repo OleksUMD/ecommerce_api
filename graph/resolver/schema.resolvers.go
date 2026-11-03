@@ -14,7 +14,7 @@ import (
 )
 
 // Register is the resolver for the register field.
-func (r *mutationResolver) Register(ctx context.Context, input dto.RegisterRequest) (*dto.AuthResponse, error) {
+func (r *mutationResolver) Register(ctx context.Context, input dto.RegisterRequest) (*dto.UserResponse, error) {
 	return r.authService.Register(&input)
 }
 

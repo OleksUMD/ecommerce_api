@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"time"
 
 	"gorm.io/gorm"
@@ -17,17 +18,18 @@ const (
 
 // User is a database table for registered users
 type User struct {
-	ID        uint           `json:"id" gorm:"primaryKey"`
-	Email     string         `json:"email" gorm:"uniqueIndex;not null"`
-	Password  string         `json:"-" gorm:"not null"`
-	FirstName string         `json:"first_name" gorm:"not null"`
-	LastName  string         `json:"last_name" gorm:"not null"`
-	Phone     string         `json:"phone" gorm:"uniqueIndex;not null"`
-	IsActive  bool           `json:"is_active" gorm:"default:true"`
-	Role      UserRole       `json:"role" gorm:"default:customer"`
-	CreatedAt time.Time      `json:"created_at"`
-	UpdatedAt time.Time      `json:"updated_at"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	Email      string         `json:"email" gorm:"uniqueIndex;not null"`
+	Password   string         `json:"-" gorm:"not null"`
+	FirstName  string         `json:"first_name" gorm:"not null"`
+	LastName   string         `json:"last_name" gorm:"not null"`
+	Phone      string         `json:"phone" gorm:"uniqueIndex;not null"`
+	IsActive   bool           `json:"is_active" gorm:"default:true"`
+	IsVerified bool           `json:"is_verified" gorm:"default:false"`
+	Role       UserRole       `json:"role" gorm:"default:customer"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
 	RefreshTokens []RefreshToken `json:"-"`
@@ -46,4 +48,17 @@ type RefreshToken struct {
 
 	// Relationships
 	User User `json:"-"`
+}
+
+// Store user data before verification
+type UnverifiedUser struct {
+	UserID   uint   `json:"user_id"`
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
+	Link     string `json:"link"`
+}
+
+func (u UnverifiedUser) MarshalBinary() ([]byte, error) {
+	// redis uses this method to serialize objects before saving to the db
+	return json.Marshal(u)
 }

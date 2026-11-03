@@ -71,13 +71,13 @@ func main() {
 		return
 	}
 	gin.SetMode(cfg.Server.GinMode)
-	cacheService := cache.NewCache(cfg)
+	cacheService := cache.NewCache(&cfg.Cache)
 	defer func() {
 		if err := cacheService.Close(); err != nil {
 			log.Error().Err(err).Msg("failed to close redis connection")
 		}
 	}()
-	userRepo := repositories.NewUserRepository(db)
+	userRepo := repositories.NewUserRepository(db, cacheService)
 	cartRepo := repositories.NewCartRepository(db)
 	authService := services.NewAuthService(
 		userRepo,

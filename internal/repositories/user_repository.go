@@ -4,28 +4,29 @@ import (
 	"errors"
 	"time"
 
+	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/models"
 	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	db *gorm.DB
+	db    *gorm.DB
+	cache *cache.CacheProvider
 }
 
-func NewUserRepository(db *gorm.DB) *UserRepository {
+func NewUserRepository(db *gorm.DB, rdb *cache.CacheProvider) *UserRepository {
 	return &UserRepository{
-		db: db,
+		db:    db,
+		cache: rdb,
 	}
 }
 
 func (r *UserRepository) GetByEmail(email string) (*models.User, error) {
 	var user models.User
-	var err error
-	err = r.db.Where("email = ?", email).First(&user).Error
-	if err != nil {
+	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
 		return nil, err
 	}
-	return &user, err
+	return &user, nil
 }
 func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 	var user models.User
@@ -38,9 +39,14 @@ func (r *UserRepository) GetByID(id uint) (*models.User, error) {
 
 func (r *UserRepository) GetByEmailAndActive(email string, isActive bool) (*models.User, error) {
 	var user models.User
-	var err error
-	err = r.db.Where("email = ? AND is_active = ?", email, isActive).First(&user).Error
-	return &user, err
+	if err := r.db.
+		Where("email = ? AND is_active = ?", email, isActive).
+		First(&user).
+		Error; err != nil {
+
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (r *UserRepository) Create(user *models.User) error {
@@ -85,4 +91,21 @@ func (r *UserRepository) DeleteRefreshToken(token string) error {
 
 func (r *UserRepository) DeleteRefreshTokenByID(id uint) error {
 	return r.db.Where("id = ?", id).Delete(&models.RefreshToken{}).Error
+}
+
+func (r *UserRepository) SaveUnverifiedUser(token string, data *models.UnverifiedUser) error {
+	return r.cache.SetTempToken(token, data)
+}
+
+func (r *UserRepository) VerifyUserEmail(token string) error {
+	unverifiedUser, err := r.cache.GetUnverifiedUser(token)
+	if err != nil {
+		return err
+	}
+	user, err := r.GetByID(unverifiedUser.UserID)
+	if err != nil {
+		return err
+	}
+	user.IsVerified = true
+	return r.db.Save(&user).Error
 }

@@ -9,20 +9,23 @@ import (
 	"gorm.io/gorm"
 )
 
-type AuthServiceInterface interface {
-	Register(req *dto.RegisterRequest) (*dto.AuthResponse, error)
+type IAuthService interface {
+	Register(req *dto.RegisterRequest) (*dto.UserResponse, error)
 	Login(req *dto.LoginRequest) (*dto.AuthResponse, error)
 	RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthResponse, error)
 	Logout(refreshToken string) error
+	VerifyEmail(token string) error
+	VerifyTOTP(token, code string) error
+	ResubmitVerificationLink(userID uint) (*dto.UserResponse, error)
 	generateAuthResponse(user *models.User) (*dto.AuthResponse, error)
 }
 
-type UserServiceInterface interface {
+type IUserService interface {
 	GetProfile(userID uint) (*dto.UserResponse, error)
 	UpdateProfile(userID uint, req *dto.UpdateProfileRequest) (*dto.UserResponse, error)
 }
 
-type ProductServiceInterface interface {
+type IProductService interface {
 	CreateCategory(req *dto.CreateCategoryRequest) (*dto.CategoryResponse, error)
 	GetCategories() ([]dto.CategoryResponse, error)
 	UpdateCategory(id uint, req *dto.UpdateCategoryRequest) (*dto.CategoryResponse, error)
@@ -37,7 +40,7 @@ type ProductServiceInterface interface {
 	SearchProducts(req *dto.SearchProductRequest) ([]dto.ProductSearchResult, *utils.PaginationMeta, error)
 }
 
-type CartServiceInterface interface {
+type ICartService interface {
 	GetCart(userID uint) (*dto.CartResponse, error)
 	AddToCart(userID uint, req *dto.AddToCartRequest) (*dto.CartResponse, error)
 	UpdateToCart(userID, itemID uint, req *dto.UpdateCartItemRequest) (*dto.CartResponse, error)
@@ -45,7 +48,7 @@ type CartServiceInterface interface {
 	convertToCartResponse(cart *models.Cart) *dto.CartResponse
 }
 
-type OrderServiceInterface interface {
+type IOrderService interface {
 	CreateOrder(userID uint) (*dto.OrderResponse, error)
 	GetOrders(userID uint, page, limit int) ([]dto.OrderResponse, *utils.PaginationMeta, error)
 	GetOrder(userID, orderID uint) (*dto.OrderResponse, error)
@@ -53,6 +56,6 @@ type OrderServiceInterface interface {
 	convertToOrderResponse(order *models.Order) dto.OrderResponse
 }
 
-type UploadServiceInterface interface {
+type IUploadService interface {
 	UploadProductImage(productID uint, file *multipart.FileHeader) (string, error)
 }

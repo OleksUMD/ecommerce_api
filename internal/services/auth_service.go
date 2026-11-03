@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/OleksUMD/ecommerce_api/internal/config"
@@ -12,18 +13,19 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/notifications"
 	"github.com/OleksUMD/ecommerce_api/internal/repositories"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
+	"github.com/google/uuid"
 )
 
 type AuthService struct {
-	userRepo       repositories.UserRepositoryInterface
-	cartRepo       repositories.CartRepositoryInterface
+	userRepo       repositories.IUserRepository
+	cartRepo       repositories.ICartRepository
 	config         *config.Config
 	eventPublisher events.Publisher
 }
 
 func NewAuthService(
-	userRepo repositories.UserRepositoryInterface,
-	cartRepo repositories.CartRepositoryInterface,
+	userRepo repositories.IUserRepository,
+	cartRepo repositories.ICartRepository,
 	config *config.Config,
 	eventPublisher events.Publisher,
 ) *AuthService {
@@ -35,7 +37,7 @@ func NewAuthService(
 	}
 }
 
-func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, error) {
+func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.UserResponse, error) {
 	exists, _ := s.userRepo.GetByEmail(req.Email)
 	if exists != nil {
 		return nil, errors.New("this email is already registered")
@@ -60,7 +62,11 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.AuthResponse, err
 	if err := s.cartRepo.Create(&cart); err != nil {
 		return nil, err
 	}
-	return s.generateAuthResponse(&user)
+	tmpTokenStr, err := s.generateTmpTokenStr()
+	if err != nil {
+		return nil, err
+	}
+	return s.generateUnverifiedUserResponse(tmpTokenStr, &user)
 }
 
 func (s *AuthService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
@@ -87,7 +93,10 @@ func (s *AuthService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthRespo
 	if err != nil {
 		return nil, errors.New("invalid token")
 	}
-	s.userRepo.DeleteRefreshTokenByID(refreshToken.ID)
+	err = s.userRepo.DeleteRefreshTokenByID(refreshToken.ID)
+	if err != nil {
+		return nil, errors.New("failed to remove refresh token")
+	}
 	return s.generateAuthResponse(user)
 }
 
@@ -110,7 +119,10 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(s.config.JWT.RefreshtokenExpires),
 	}
-	s.userRepo.CreateRefreshToken(&refreshTokenModel)
+	err = s.userRepo.CreateRefreshToken(&refreshTokenModel)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create access tokens: %w", err)
+	}
 	err = s.eventPublisher.Publish(notifications.UserLoggedIn, user, map[string]string{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate auth event message: %w", err)
@@ -131,4 +143,63 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 		RefreshToken: refreshToken,
 	}
 	return authResponse, nil
+}
+
+func (s *AuthService) generateUnverifiedUserResponse(tmpTokenStr string, user *models.User) (*dto.UserResponse, error) {
+	baseAddr := net.JoinHostPort(s.config.Server.Host, s.config.Server.Port)
+	tmpLink := fmt.Sprintf("http://%s/api/v1/auth/verify/%s", baseAddr, tmpTokenStr)
+	payload := &models.UnverifiedUser{
+		UserID:   user.ID,
+		UserName: user.FirstName + " " + user.LastName,
+		Link:     tmpLink,
+		Email:    user.Email,
+	}
+	err := s.userRepo.SaveUnverifiedUser(tmpTokenStr, payload)
+	if err != nil {
+		return nil, err
+	}
+	err = s.eventPublisher.Publish(notifications.UserRegistered, payload, map[string]string{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate registration event message: %w", err)
+	}
+	regResponse := &dto.UserResponse{
+		ID:        user.ID,
+		Email:     user.Email,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Phone:     user.Phone,
+		Role:      string(user.Role),
+		IsActive:  user.IsActive,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+	return regResponse, nil
+}
+
+func (s *AuthService) VerifyEmail(token string) error {
+	return s.userRepo.VerifyUserEmail(token)
+}
+
+func (s *AuthService) VerifyTOTP(token, code string) error {
+	return nil
+}
+
+func (s *AuthService) generateTmpTokenStr() (string, error) {
+	token, err := uuid.NewV7()
+	if err != nil {
+		return "", err
+	}
+	return token.String(), nil
+}
+
+func (s *AuthService) ResubmitVerificationLink(userID uint) (*dto.UserResponse, error) {
+	tmpTokenStr, err := s.generateTmpTokenStr()
+	if err != nil {
+		return nil, err
+	}
+	user, err := s.userRepo.GetByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	return s.generateUnverifiedUserResponse(tmpTokenStr, user)
 }

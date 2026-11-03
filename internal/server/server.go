@@ -19,26 +19,26 @@ import (
 type Server struct {
 	config         *config.Config
 	logger         zerolog.Logger
-	cache          cache.CacheInterface
-	authService    services.AuthServiceInterface
-	productService services.ProductServiceInterface
-	userService    services.UserServiceInterface
-	uploadService  services.UploadServiceInterface
-	cartService    services.CartServiceInterface
-	orderService   services.OrderServiceInterface
+	cache          cache.ICacheProvider
+	authService    services.IAuthService
+	productService services.IProductService
+	userService    services.IUserService
+	uploadService  services.IUploadService
+	cartService    services.ICartService
+	orderService   services.IOrderService
 }
 
 // New creates and returns a new instance of app server
 func New(
 	cfg *config.Config,
 	logger zerolog.Logger,
-	authService services.AuthServiceInterface,
-	productService services.ProductServiceInterface,
-	userService services.UserServiceInterface,
-	uploadService services.UploadServiceInterface,
-	cartService services.CartServiceInterface,
-	orderService services.OrderServiceInterface,
-	cache cache.CacheInterface,
+	authService services.IAuthService,
+	productService services.IProductService,
+	userService services.IUserService,
+	uploadService services.IUploadService,
+	cartService services.ICartService,
+	orderService services.IOrderService,
+	cache cache.ICacheProvider,
 ) *Server {
 	return &Server{
 		config:         cfg,
@@ -67,61 +67,7 @@ func (s *Server) SetupRoutes() *gin.Engine {
 
 	router.Static("/uploads", "./uploads")
 
-	// default protected graphql playground
-	router.GET("/playground", s.graphQLPlaygroundHandler())
-
-	router.GET("/playground/public", s.graphQLPlaygroundPublicHandler())
-	graphqlPublic := router.Group("/graphql/public")
-	graphqlPublic.Use(s.graphQLMiddleware())
-	graphqlPublic.POST("/", s.graphQLHandler())
-
-	graphqlProtected := router.Group("/graphql")
-	graphqlProtected.Use(s.authMiddleware())
-	graphqlProtected.Use(s.graphQLMiddleware())
-	graphqlProtected.POST("/", s.graphQLHandler())
-
-	api := router.Group("/api/v1")
-	auth := api.Group("auth")
-	auth.POST("/register", s.register)
-	auth.POST("/login", s.login)
-	auth.POST("/logout", s.logout)
-	auth.POST("/refresh", s.refreshToken)
-
-	// Private routes
-	protected := api.Group("/")
-	protected.Use(s.authMiddleware())
-
-	userRoutes := protected.Group("users")
-	userRoutes.GET("/profile", s.getProfile)
-	userRoutes.PUT("/profile", s.updateProfile)
-
-	categoryRoutes := protected.Group("categories")
-	categoryRoutes.POST("/", s.adminMiddleware(), s.createCategory)
-	categoryRoutes.PUT("/:id", s.adminMiddleware(), s.updateCategory)
-	categoryRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteCategory)
-
-	productRoutes := protected.Group("products")
-	productRoutes.POST("/", s.adminMiddleware(), s.createProduct)
-	productRoutes.PUT("/:id", s.adminMiddleware(), s.updateProduct)
-	productRoutes.DELETE("/:id", s.adminMiddleware(), s.deleteProduct)
-	productRoutes.POST("/:id/images", s.adminMiddleware(), s.uploadProductImage)
-
-	cartRoutes := protected.Group("cart")
-	cartRoutes.GET("/", s.getCart)
-	cartRoutes.POST("/items", s.addToCart)
-	cartRoutes.PUT("/items/:id", s.updateCartItem)
-	cartRoutes.DELETE("/items/:id", s.removeFromCart)
-
-	orderRoutes := protected.Group("orders")
-	orderRoutes.POST("/", s.createOrder)
-	orderRoutes.GET("/", s.getOrders)
-	orderRoutes.GET("/:id", s.getOrder)
-
-	// Public routes
-	api.GET("/categories", s.getCategories)
-	api.GET("/search", s.searchProducts)
-	api.GET("/products", s.getProducts)
-	api.GET("/products/:id", s.getProduct)
+	s.setApiAndGraphRoutes(router)
 
 	return router
 }

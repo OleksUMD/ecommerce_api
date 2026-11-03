@@ -32,6 +32,9 @@ func (s *Server) createCategory(c *gin.Context) {
 		utils.BadRequestResponse(c, "Create category failed", err)
 		return
 	}
+	if err := s.cache.CleanCategories(context.Background()); err != nil {
+		s.logger.Err(err).Msg("failed to cleanup cached categories")
+	}
 	utils.CreatedResponse(c, "Category created successfully", response)
 }
 
@@ -53,7 +56,9 @@ func (s *Server) getCategories(c *gin.Context) {
 			utils.BadRequestResponse(c, "Get categories failed", err)
 			return
 		}
-		s.cache.SetCategories(context.Background(), response)
+		if err := s.cache.SetCategories(context.Background(), response); err != nil {
+			s.logger.Err(err).Msg("failed to save categories in the cache database")
+		}
 	}
 	utils.SuccessResponse(c, "Categories retrieved successfully", response)
 }
@@ -87,7 +92,9 @@ func (s *Server) updateCategory(c *gin.Context) {
 		utils.BadRequestResponse(c, "Update category failed", err)
 		return
 	}
-	s.cache.CleanCategories(context.Background())
+	if err := s.cache.CleanCategories(context.Background()); err != nil {
+		s.logger.Err(err).Msg("failed to cleanup cached categories")
+	}
 	utils.SuccessResponse(c, "Category updated successfully", response)
 }
 
@@ -112,7 +119,9 @@ func (s *Server) deleteCategory(c *gin.Context) {
 		utils.BadRequestResponse(c, "Delete category failed", err)
 		return
 	}
-	s.cache.CleanCategories(context.Background())
+	if err := s.cache.CleanCategories(context.Background()); err != nil {
+		s.logger.Err(err).Msg("failed to cleanup cached categories")
+	}
 	utils.SuccessNoContentResponse(c, "Category deleted successfully", nil)
 }
 

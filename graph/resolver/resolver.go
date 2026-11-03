@@ -12,19 +12,19 @@ import (
 // here.
 
 type Resolver struct {
-	authService    services.AuthServiceInterface
-	userService    services.UserServiceInterface
-	productService services.ProductServiceInterface
-	cartService    services.CartServiceInterface
-	orderService   services.OrderServiceInterface
+	authService    services.IAuthService
+	userService    services.IUserService
+	productService services.IProductService
+	cartService    services.ICartService
+	orderService   services.IOrderService
 }
 
 func NewResolver(
-	authService services.AuthServiceInterface,
-	userService services.UserServiceInterface,
-	productService services.ProductServiceInterface,
-	cartService services.CartServiceInterface,
-	orderService services.OrderServiceInterface,
+	authService services.IAuthService,
+	userService services.IUserService,
+	productService services.IProductService,
+	cartService services.ICartService,
+	orderService services.IOrderService,
 ) *Resolver {
 	return &Resolver{
 		authService:    authService,
