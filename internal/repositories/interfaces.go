@@ -9,13 +9,18 @@ type IUserRepository interface {
 	Create(user *models.User) error
 	Update(user *models.User) error
 	Delete(id uint) error
-
 	CreateRefreshToken(token *models.RefreshToken) error
+	UnverifyUser(id uint) error
 	GetValidRefreshToken(token string) (*models.RefreshToken, error)
 	DeleteRefreshToken(token string) error
 	DeleteRefreshTokenByID(id uint) error
+	DeleteRefreshTokenByUserID(userID uint) error
 	SaveUnverifiedUser(token string, data *models.UnverifiedUser) error
-	VerifyUserEmail(token string) error
+	ConfirmUserEmail(user *models.User) error
+	AddUserMFA(user *models.User, totpSecret, backupCode string) error
+	GetMfaBackup(userID uint) (*models.UserMFABackup, error)
+	UpdateMfaBackup(mfaBackup *models.UserMFABackup) error
+	GetByTmpToken(token string) (*models.User, error)
 }
 
 type ICartRepository interface {

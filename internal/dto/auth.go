@@ -54,3 +54,25 @@ type RegisterResponse struct {
 	User    UserResponse `json:"user"`
 	Message string       `json:"message"`
 }
+
+// AuthResponse is received by the user when the one has successfully logged in
+type AddMFAResponse struct {
+	TOTPSecret string `json:"totp_secret"`
+	TOTPLink   string `json:"totp_link"`
+	BackupCode string `json:"backup_code"`
+}
+
+type BackupRequest struct {
+	Token      string `json:"token" binding:"required"`
+	BackupCode string `json:"backup_code" binding:"required"`
+}
+
+type TotpRequest struct {
+	Token    string `json:"token" binding:"required"`
+	TotpCode string `json:"totp_code" binding:"required"`
+}
+
+type TmpAuthResponse struct {
+	User     UserResponse `json:"user"`
+	TmpToken string       `json:"tmp_token"`
+}

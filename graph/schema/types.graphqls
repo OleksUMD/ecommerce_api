@@ -18,6 +18,11 @@ type AuthPayload {
   refresh_token: String!
 }
 
+type TmpAuthPayload {
+  user: User!
+  tmp_token: String!
+}
+
 type Category {
   id: ID!
   name: String!

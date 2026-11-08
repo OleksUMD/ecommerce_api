@@ -19,7 +19,7 @@ func (r *mutationResolver) Register(ctx context.Context, input dto.RegisterReque
 }
 
 // Login is the resolver for the login field.
-func (r *mutationResolver) Login(ctx context.Context, input dto.LoginRequest) (*dto.AuthResponse, error) {
+func (r *mutationResolver) Login(ctx context.Context, input dto.LoginRequest) (*dto.TmpAuthResponse, error) {
 	return r.authService.Login(&input)
 }
 
@@ -29,8 +29,12 @@ func (r *mutationResolver) RefreshToken(ctx context.Context, input dto.RefreshTo
 }
 
 // Logout is the resolver for the logout field.
-func (r *mutationResolver) Logout(ctx context.Context, input dto.RefreshTokenRequest) (bool, error) {
-	err := r.authService.Logout(input.RefreshToken)
+func (r *mutationResolver) Logout(ctx context.Context, id string) (bool, error) {
+	userID, err := r.parseID(id)
+	if err != nil {
+		return false, err
+	}
+	err = r.authService.Logout(userID)
 	if err != nil {
 		return false, err
 	}

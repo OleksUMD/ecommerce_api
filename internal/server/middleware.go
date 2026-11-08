@@ -30,7 +30,11 @@ func (s *Server) authMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// TODO: check if refresh token also valid otherwise return 401
+		if !s.userService.UserIsVerified(claims.UserID) {
+			utils.UnauthorizedResponse(c, "User verification failed", err)
+			c.Abort()
+			return
+		}
 
 		c.Set(utils.UserIDKey, claims.UserID)
 		c.Set(utils.UserEmailKey, claims.Email)
@@ -50,6 +54,17 @@ func (s *Server) adminMiddleware() gin.HandlerFunc {
 
 		if role.(string) != string(models.UserRoleAdmin) {
 			utils.ForbiddenResponse(c, "Forbidden", nil)
+			c.Abort()
+			return
+		}
+		userID, exists := c.Get(utils.UserIDKey)
+		if !exists {
+			utils.ForbiddenResponse(c, "Forbidden", nil)
+			c.Abort()
+			return
+		}
+		if !s.userService.UserIsVerified(userID.(uint)) {
+			utils.UnauthorizedResponse(c, "User verification failed", nil)
 			c.Abort()
 			return
 		}

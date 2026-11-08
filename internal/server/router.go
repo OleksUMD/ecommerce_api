@@ -46,19 +46,22 @@ func (s *Server) setUpAuthRoutes(router *gin.RouterGroup) {
 	auth := router.Group("auth")
 	auth.POST("/register", s.register)
 	auth.POST("/login", s.login)
-	auth.POST("/logout", s.logout)
 	auth.POST("/refresh", s.refreshToken)
-	auth.GET("/verify/:token", s.verifyEmail)
+	auth.GET("/verify-email/:token", s.verifyEmail)
+	auth.POST("/verify-email/:token", s.resendVerificationLink)
+	auth.POST("/verify-totp", s.verifyTOTP)
+	auth.GET("/add-mfa/:token", s.addMFA)
+	auth.POST("/backup-recovery", s.useBackup)
 }
 
 func (s *Server) setUpApiPrivateRoutes(router *gin.RouterGroup) {
-	auth := router.Group("/")
-	auth = s.protectRoutes(auth)
-	s.setUpUserRoutes(auth)
-	s.setUpCategoryRoutes(auth)
-	s.setUpProductRoutes(auth)
-	s.setUpCartRoutes(auth)
-	s.setUpOrderRoutes(auth)
+	api := router.Group("/")
+	api = s.protectRoutes(api)
+	s.setUpUserRoutes(api)
+	s.setUpCategoryRoutes(api)
+	s.setUpProductRoutes(api)
+	s.setUpCartRoutes(api)
+	s.setUpOrderRoutes(api)
 }
 
 func (s *Server) setUpUserRoutes(router *gin.RouterGroup) {
@@ -66,7 +69,7 @@ func (s *Server) setUpUserRoutes(router *gin.RouterGroup) {
 	userRoutes := router.Group("users")
 	userRoutes.GET("/profile", s.getProfile)
 	userRoutes.PUT("/profile", s.updateProfile)
-	userRoutes.POST("/verify-email", s.resendVerificationLink)
+	userRoutes.POST("/logout", s.logout)
 }
 
 func (s *Server) setUpCategoryRoutes(router *gin.RouterGroup) {

@@ -53,3 +53,11 @@ func (s *UserService) UpdateProfile(userID uint, req *dto.UpdateProfileRequest) 
 	}
 	return s.GetProfile(userID)
 }
+
+func (s *UserService) UserIsVerified(userID uint) bool {
+	var user models.User
+	if err := s.db.First(&user, userID).Error; err != nil {
+		return false
+	}
+	return user.IsVerified
+}

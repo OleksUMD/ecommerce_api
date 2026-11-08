@@ -18,18 +18,21 @@ const (
 
 // User is a database table for registered users
 type User struct {
-	ID         uint           `json:"id" gorm:"primaryKey"`
-	Email      string         `json:"email" gorm:"uniqueIndex;not null"`
-	Password   string         `json:"-" gorm:"not null"`
-	FirstName  string         `json:"first_name" gorm:"not null"`
-	LastName   string         `json:"last_name" gorm:"not null"`
-	Phone      string         `json:"phone" gorm:"uniqueIndex;not null"`
-	IsActive   bool           `json:"is_active" gorm:"default:true"`
-	IsVerified bool           `json:"is_verified" gorm:"default:false"`
-	Role       UserRole       `json:"role" gorm:"default:customer"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `json:"-" gorm:"index"`
+	ID             uint           `json:"id" gorm:"primaryKey"`
+	Email          string         `json:"email" gorm:"uniqueIndex;not null"`
+	Password       string         `json:"-" gorm:"not null"`
+	FirstName      string         `json:"first_name" gorm:"not null"`
+	LastName       string         `json:"last_name" gorm:"not null"`
+	Phone          string         `json:"phone" gorm:"uniqueIndex;not null"`
+	IsActive       bool           `json:"is_active" gorm:"default:true"`
+	IsVerified     bool           `json:"is_verified" gorm:"default:false"`
+	EmailConfirmed bool           `json:"email_confirmed" gorm:"default:false"`
+	IsMfaEnabled   bool           `json:"is_mfa_enabled" gorm:"default:false"`
+	TotpSecret     string         `json:"totp_secret" gorm:"not null"`
+	Role           UserRole       `json:"role" gorm:"default:customer"`
+	CreatedAt      time.Time      `json:"created_at"`
+	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
 	RefreshTokens []RefreshToken `json:"-"`
@@ -61,4 +64,14 @@ type UnverifiedUser struct {
 func (u UnverifiedUser) MarshalBinary() ([]byte, error) {
 	// redis uses this method to serialize objects before saving to the db
 	return json.Marshal(u)
+}
+
+type UserMFABackup struct {
+	ID         uint           `json:"id" gorm:"primaryKey"`
+	UserID     uint           `json:"user_id" gorm:"not null"`
+	BackupCode string         `json:"backup_code" gorm:"not null"`
+	IsUsed     bool           `json:"is_used" gorm:"default:false"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"-"`
 }

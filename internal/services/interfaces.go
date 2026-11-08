@@ -11,18 +11,24 @@ import (
 
 type IAuthService interface {
 	Register(req *dto.RegisterRequest) (*dto.UserResponse, error)
-	Login(req *dto.LoginRequest) (*dto.AuthResponse, error)
+	Login(req *dto.LoginRequest) (*dto.TmpAuthResponse, error)
 	RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthResponse, error)
-	Logout(refreshToken string) error
+	Logout(userID uint) error
 	VerifyEmail(token string) error
-	VerifyTOTP(token, code string) error
-	ResubmitVerificationLink(userID uint) (*dto.UserResponse, error)
+	VerifyTOTP(req *dto.TotpRequest) (*dto.AuthResponse, error)
+	ResubmitVerificationLink(token string) (*dto.UserResponse, error)
+	AddMFA(user *models.User) (*dto.AddMFAResponse, error)
+	UseBackup(req *dto.BackupRequest) (*dto.AddMFAResponse, error)
+	GetUnverifiedUser(token string) (*models.User, error)
 	generateAuthResponse(user *models.User) (*dto.AuthResponse, error)
+	generateAddMFAUserResponse(user *models.User) (*dto.AddMFAResponse, error)
+	checkBackupCode(backupCode, inputCode string) error
 }
 
 type IUserService interface {
 	GetProfile(userID uint) (*dto.UserResponse, error)
 	UpdateProfile(userID uint, req *dto.UpdateProfileRequest) (*dto.UserResponse, error)
+	UserIsVerified(userID uint) bool
 }
 
 type IProductService interface {

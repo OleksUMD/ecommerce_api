@@ -12,6 +12,7 @@ help:
 	@echo " make migrate-up               - Apply database migrations"
 	@echo " make migrate-down             - Rollback database migrations"
 	@echo " make docs-generate            - Generate Swagger API documentation"
+	@echo " make docker-build             - Build app and notifier images"
 	@echo " make docker-up                - Start project in docker compose"
 	@echo " make docker-down              - Stop project in docker compose"
 	@echo " make docker-build-app         - Build app docker image"
@@ -46,11 +47,14 @@ migrate-up:
 	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" up
 
 migrate-down:
-	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" down
+	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" down 1
 
 migrate-force-zero:
 	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" force
 
+
+docker-build:
+	docker compose -f docker/docker-compose.yaml --env-file .docker.env build app notifier --no-cache
 
 docker-up:
 	docker compose -f docker/docker-compose.yaml --env-file .docker.env up -d

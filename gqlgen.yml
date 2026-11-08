@@ -24,6 +24,8 @@ models:
     model: github.com/OleksUMD/ecommerce_api/internal/dto.UserResponse
   AuthPayload:
     model: github.com/OleksUMD/ecommerce_api/internal/dto.AuthResponse
+  TmpAuthPayload:
+    model: github.com/OleksUMD/ecommerce_api/internal/dto.TmpAuthResponse
   Product:
     model: github.com/OleksUMD/ecommerce_api/internal/dto.ProductResponse
   Category:

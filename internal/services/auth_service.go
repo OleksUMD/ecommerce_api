@@ -58,10 +58,6 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.UserResponse, err
 		return nil, err
 	}
 
-	cart := models.Cart{UserID: user.ID}
-	if err := s.cartRepo.Create(&cart); err != nil {
-		return nil, err
-	}
 	tmpTokenStr, err := s.generateTmpTokenStr()
 	if err != nil {
 		return nil, err
@@ -69,7 +65,7 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.UserResponse, err
 	return s.generateUnverifiedUserResponse(tmpTokenStr, &user)
 }
 
-func (s *AuthService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
+func (s *AuthService) Login(req *dto.LoginRequest) (*dto.TmpAuthResponse, error) {
 	user, err := s.userRepo.GetByEmailAndActive(req.Email, true)
 	if err != nil {
 		return nil, errors.New("invalid credentials")
@@ -77,7 +73,7 @@ func (s *AuthService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
 	if !utils.CheckPassword(req.Password, user.Password) {
 		return nil, errors.New("invalid credentials")
 	}
-	return s.generateAuthResponse(user)
+	return s.generateTmpAuthResponse(user)
 }
 
 func (s *AuthService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthResponse, error) {
@@ -100,8 +96,11 @@ func (s *AuthService) RefreshToken(req *dto.RefreshTokenRequest) (*dto.AuthRespo
 	return s.generateAuthResponse(user)
 }
 
-func (s *AuthService) Logout(refreshToken string) error {
-	return s.userRepo.DeleteRefreshToken(refreshToken)
+func (s *AuthService) Logout(userID uint) error {
+	if err := s.userRepo.UnverifyUser(userID); err != nil {
+		return err
+	}
+	return s.userRepo.DeleteRefreshTokenByUserID(userID)
 }
 
 func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse, error) {
@@ -147,7 +146,7 @@ func (s *AuthService) generateAuthResponse(user *models.User) (*dto.AuthResponse
 
 func (s *AuthService) generateUnverifiedUserResponse(tmpTokenStr string, user *models.User) (*dto.UserResponse, error) {
 	baseAddr := net.JoinHostPort(s.config.Server.Host, s.config.Server.Port)
-	tmpLink := fmt.Sprintf("http://%s/api/v1/auth/verify/%s", baseAddr, tmpTokenStr)
+	tmpLink := fmt.Sprintf("http://%s/api/v1/auth/verify-email/%s", baseAddr, tmpTokenStr)
 	payload := &models.UnverifiedUser{
 		UserID:   user.ID,
 		UserName: user.FirstName + " " + user.LastName,
@@ -177,11 +176,58 @@ func (s *AuthService) generateUnverifiedUserResponse(tmpTokenStr string, user *m
 }
 
 func (s *AuthService) VerifyEmail(token string) error {
-	return s.userRepo.VerifyUserEmail(token)
+	user, err := s.userRepo.GetByTmpToken(token)
+	if err != nil {
+		return err
+	}
+
+	cart := models.Cart{UserID: user.ID}
+	if err := s.cartRepo.Create(&cart); err != nil {
+		return err
+	}
+	return s.userRepo.ConfirmUserEmail(user)
 }
 
-func (s *AuthService) VerifyTOTP(token, code string) error {
-	return nil
+func (s *AuthService) VerifyTOTP(req *dto.TotpRequest) (*dto.AuthResponse, error) {
+	user, err := s.userRepo.GetByTmpToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+	plainSecret, err := utils.DecryptKey(user.TotpSecret, s.config.JWT.MfaEncKey)
+	if err != nil {
+		return nil, err
+	}
+	if !utils.ValidateTOTP(req.TotpCode, plainSecret) {
+		return nil, errors.New("totp validation failed")
+	}
+	if !user.IsMfaEnabled {
+		user.IsMfaEnabled = true
+	}
+	user.IsVerified = true
+	if err := s.userRepo.Update(user); err != nil {
+		return nil, err
+	}
+	return s.generateAuthResponse(user)
+}
+
+func (s *AuthService) UseBackup(req *dto.BackupRequest) (*dto.AddMFAResponse, error) {
+	user, err := s.userRepo.GetByTmpToken(req.Token)
+	if err != nil {
+		return nil, err
+	}
+	mfaBackup, err := s.userRepo.GetMfaBackup(user.ID)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.checkBackupCode(mfaBackup.BackupCode, req.BackupCode); err != nil {
+		return nil, err
+	}
+	mfaBackup.IsUsed = true
+	err = s.userRepo.UpdateMfaBackup(mfaBackup)
+	if err != nil {
+		return nil, err
+	}
+	return s.generateAddMFAUserResponse(user)
 }
 
 func (s *AuthService) generateTmpTokenStr() (string, error) {
@@ -192,14 +238,80 @@ func (s *AuthService) generateTmpTokenStr() (string, error) {
 	return token.String(), nil
 }
 
-func (s *AuthService) ResubmitVerificationLink(userID uint) (*dto.UserResponse, error) {
+func (s *AuthService) ResubmitVerificationLink(token string) (*dto.UserResponse, error) {
+	user, err := s.userRepo.GetByTmpToken(token)
+	if err != nil {
+		return nil, err
+	}
+	newToken, err := s.generateTmpTokenStr()
+	if err != nil {
+		return nil, err
+	}
+	return s.generateUnverifiedUserResponse(newToken, user)
+}
+
+func (s *AuthService) AddMFA(user *models.User) (*dto.AddMFAResponse, error) {
+	return s.generateAddMFAUserResponse(user)
+}
+
+func (s *AuthService) generateAddMFAUserResponse(user *models.User) (*dto.AddMFAResponse, error) {
+	otpKey, err := utils.GenerateMFAKey(s.config.JWT.MfaIssuer, user.Email)
+	if err != nil {
+		return nil, err
+	}
+	backupCode, hashedCode, err := utils.GenerateBackupCode()
+	if err != nil {
+		return nil, err
+	}
+	encTOTPSecret, err := utils.EncryptKey(otpKey.Secret(), s.config.JWT.MfaEncKey)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.userRepo.AddUserMFA(user, encTOTPSecret, hashedCode); err != nil {
+		return nil, err
+	}
+	return &dto.AddMFAResponse{
+		TOTPSecret: otpKey.Secret(),
+		TOTPLink:   otpKey.URL(),
+		BackupCode: backupCode,
+	}, nil
+}
+
+func (s *AuthService) checkBackupCode(backupCode, inputCode string) error {
+	return utils.CheckBackupCode(backupCode, inputCode)
+}
+
+func (s *AuthService) generateTmpAuthResponse(user *models.User) (*dto.TmpAuthResponse, error) {
 	tmpTokenStr, err := s.generateTmpTokenStr()
 	if err != nil {
 		return nil, err
 	}
-	user, err := s.userRepo.GetByID(userID)
+	unverifiedUser := &models.UnverifiedUser{
+		UserID: user.ID,
+		Email:  user.Email,
+	}
+	err = s.userRepo.SaveUnverifiedUser(tmpTokenStr, unverifiedUser)
 	if err != nil {
 		return nil, err
 	}
-	return s.generateUnverifiedUserResponse(tmpTokenStr, user)
+
+	authResponse := &dto.TmpAuthResponse{
+		User: dto.UserResponse{
+			ID:        user.ID,
+			Email:     user.Email,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Phone:     user.Phone,
+			Role:      string(user.Role),
+			IsActive:  user.IsActive,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		},
+		TmpToken: tmpTokenStr,
+	}
+	return authResponse, nil
+}
+
+func (s *AuthService) GetUnverifiedUser(token string) (*models.User, error) {
+	return s.userRepo.GetByTmpToken(token)
 }

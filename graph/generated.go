@@ -88,7 +88,7 @@ type ComplexityRoot struct {
 		DeleteCategory func(childComplexity int, id string) int
 		DeleteProduct  func(childComplexity int, id string) int
 		Login          func(childComplexity int, input dto.LoginRequest) int
-		Logout         func(childComplexity int, input dto.RefreshTokenRequest) int
+		Logout         func(childComplexity int, id string) int
 		RefreshToken   func(childComplexity int, input dto.RefreshTokenRequest) int
 		Register       func(childComplexity int, input dto.RegisterRequest) int
 		RemoveFromCart func(childComplexity int, id string) int
@@ -175,6 +175,11 @@ type ComplexityRoot struct {
 		Products   func(childComplexity int, page *int, limit *int) int
 	}
 
+	TmpAuthPayload struct {
+		TmpToken func(childComplexity int) int
+		User     func(childComplexity int) int
+	}
+
 	User struct {
 		CreatedAt func(childComplexity int) int
 		Email     func(childComplexity int) int
@@ -204,9 +209,9 @@ type CategoryResolver interface {
 }
 type MutationResolver interface {
 	Register(ctx context.Context, input dto.RegisterRequest) (*dto.UserResponse, error)
-	Login(ctx context.Context, input dto.LoginRequest) (*dto.AuthResponse, error)
+	Login(ctx context.Context, input dto.LoginRequest) (*dto.TmpAuthResponse, error)
 	RefreshToken(ctx context.Context, input dto.RefreshTokenRequest) (*dto.AuthResponse, error)
-	Logout(ctx context.Context, input dto.RefreshTokenRequest) (bool, error)
+	Logout(ctx context.Context, id string) (bool, error)
 	UpdateProfile(ctx context.Context, input dto.UpdateProfileRequest) (*dto.UserResponse, error)
 	CreateCategory(ctx context.Context, input dto.CreateCategoryRequest) (*dto.CategoryResponse, error)
 	UpdateCategory(ctx context.Context, id string, input dto.UpdateCategoryRequest) (*dto.CategoryResponse, error)
@@ -476,7 +481,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Mutation.Logout(childComplexity, args["input"].(dto.RefreshTokenRequest)), true
+		return e.ComplexityRoot.Mutation.Logout(childComplexity, args["id"].(string)), true
 	case "Mutation.refreshToken":
 		if e.ComplexityRoot.Mutation.RefreshToken == nil {
 			break
@@ -868,6 +873,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.Products(childComplexity, args["page"].(*int), args["limit"].(*int)), true
 
+	case "TmpAuthPayload.tmp_token":
+		if e.ComplexityRoot.TmpAuthPayload.TmpToken == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TmpAuthPayload.TmpToken(childComplexity), true
+	case "TmpAuthPayload.user":
+		if e.ComplexityRoot.TmpAuthPayload.User == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TmpAuthPayload.User(childComplexity), true
+
 	case "User.created_at":
 		if e.ComplexityRoot.User.CreatedAt == nil {
 			break
@@ -1238,6 +1256,16 @@ func (ec *executionContext) childFields_ProductImage(ctx context.Context, field 
 	return nil, fmt.Errorf("no field named %q was found under type ProductImage", field.Name)
 }
 
+func (ec *executionContext) childFields_TmpAuthPayload(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "user":
+		return ec.fieldContext_TmpAuthPayload_user(ctx, field)
+	case "tmp_token":
+		return ec.fieldContext_TmpAuthPayload_tmp_token(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type TmpAuthPayload", field.Name)
+}
+
 func (ec *executionContext) childFields_User(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
@@ -1465,14 +1493,14 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Mutation_logout_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
-		func(ctx context.Context, v any) (dto.RefreshTokenRequest, error) {
-			return ec.unmarshalNRefreshTokenInput2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐRefreshTokenRequest(ctx, v)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["input"] = arg0
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -2311,8 +2339,8 @@ func (ec *executionContext) _Mutation_login(ctx context.Context, field graphql.C
 			return ec.Resolvers.Mutation().Login(ctx, fc.Args["input"].(dto.LoginRequest))
 		},
 		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v *dto.AuthResponse) graphql.Marshaler {
-			return ec.marshalNAuthPayload2ᚖgithubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐAuthResponse(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v *dto.TmpAuthResponse) graphql.Marshaler {
+			return ec.marshalNTmpAuthPayload2ᚖgithubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐTmpAuthResponse(ctx, selections, v)
 		},
 		true,
 		true,
@@ -2325,7 +2353,7 @@ func (ec *executionContext) fieldContext_Mutation_login(ctx context.Context, fie
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_AuthPayload(ctx, field)
+			return ec.childFields_TmpAuthPayload(ctx, field)
 		},
 	}
 	defer func() {
@@ -2396,7 +2424,7 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().Logout(ctx, fc.Args["input"].(dto.RefreshTokenRequest))
+			return ec.Resolvers.Mutation().Logout(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
@@ -4258,6 +4286,61 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _TmpAuthPayload_user(ctx context.Context, field graphql.CollectedField, obj *dto.TmpAuthResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TmpAuthPayload_user(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.User, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v dto.UserResponse) graphql.Marshaler {
+			return ec.marshalNUser2githubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐUserResponse(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TmpAuthPayload_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TmpAuthPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_User(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TmpAuthPayload_tmp_token(ctx context.Context, field graphql.CollectedField, obj *dto.TmpAuthResponse) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TmpAuthPayload_tmp_token(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.TmpToken, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TmpAuthPayload_tmp_token(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("TmpAuthPayload", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *dto.UserResponse) (ret graphql.Marshaler) {
@@ -7400,6 +7483,49 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var tmpAuthPayloadImplementors = []string{"TmpAuthPayload"}
+
+func (ec *executionContext) _TmpAuthPayload(ctx context.Context, sel ast.SelectionSet, obj *dto.TmpAuthResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tmpAuthPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferredFieldSet := graphql.NewFieldSet(nil)
+	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TmpAuthPayload")
+		case "user":
+			out.Values[i] = ec._TmpAuthPayload_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tmp_token":
+			out.Values[i] = ec._TmpAuthPayload_tmp_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
+
+	ec.ProcessDeferredGroup(graphql.DeferredGroup{
+		Defers:   deferLabelToView,
+		Path:     graphql.GetPath(ctx),
+		FieldSet: deferredFieldSet,
+		Context:  ctx,
+	})
+
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *dto.UserResponse) graphql.Marshaler {
@@ -8243,6 +8369,16 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNTmpAuthPayload2ᚖgithubᚗcomᚋOleksUMDᚋecommerce_apiᚋinternalᚋdtoᚐTmpAuthResponse(ctx context.Context, sel ast.SelectionSet, v *dto.TmpAuthResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TmpAuthPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNUInt2uint(ctx context.Context, v any) (uint, error) {

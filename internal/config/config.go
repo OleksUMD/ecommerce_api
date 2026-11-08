@@ -51,6 +51,8 @@ type JWTConfig struct {
 	Secret              string
 	ExpiresIn           time.Duration
 	RefreshtokenExpires time.Duration
+	MfaEncKey           string
+	MfaIssuer           string
 }
 
 // AWSConfig contains settings for AWS services
@@ -128,6 +130,8 @@ func Load() (*Config, error) {
 
 	jwt := JWTConfig{
 		Secret:              getEnv("JWT_SECRET", "super-long-secret"),
+		MfaEncKey:           getEnv("MFA_ENC_KEY", "another-!ong-3ecret"),
+		MfaIssuer:           getEnv("MFA_ISSUER", "E-commerce API"),
 		ExpiresIn:           jwtExpiresIn,
 		RefreshtokenExpires: refreshTokenExpires,
 	}

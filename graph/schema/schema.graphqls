@@ -10,9 +10,9 @@ type Query {
 
 type Mutation {
   register(input: RegisterInput!): User!
-  login(input: LoginInput!): AuthPayload!
+  login(input: LoginInput!): TmpAuthPayload!
   refreshToken(input: RefreshTokenInput!): AuthPayload!
-  logout(input: RefreshTokenInput!): Boolean!
+  logout(id: ID!): Boolean!
 
   updateProfile(input: UpdateProfileInput!): User!
 
