@@ -88,6 +88,8 @@ func processMessage(msg *message.Message, notifier *notifications.EmailNotifier)
 		return handleUserLoggedIn(msg, notifier)
 	case notifications.UserRegistered:
 		return handleUserRegistered(msg, notifier)
+	case notifications.UserResetPassword:
+		return handleUserResetPassword(msg, notifier)
 	default:
 		log.Printf("Unknown event type: %s\n", eventType)
 		return nil
@@ -114,4 +116,13 @@ func handleUserRegistered(msg *message.Message, notifier *notifications.EmailNot
 	}
 	log.Printf("[USER:%d] Sending email verification link to %s\n", user.UserID, user.Email)
 	return notifier.SendEmailVerificationLink(user.Email, user.UserName, user.Link)
+}
+
+func handleUserResetPassword(msg *message.Message, notifier *notifications.EmailNotifier) error {
+	var user models.UnverifiedUser
+	if err := json.Unmarshal(msg.Payload, &user); err != nil {
+		return err
+	}
+	log.Printf("[USER:%d] Sending reset password link to %s\n", user.UserID, user.Email)
+	return notifier.SendResetPasswordLink(user.Email, user.UserName, user.Link)
 }

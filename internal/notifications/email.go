@@ -123,3 +123,25 @@ The Shop Team`, userName, tmpLink,
 	}
 	return e.SendSimpleEmail(email)
 }
+
+func (e *EmailNotifier) SendResetPasswordLink(userEmail, userName, tmpLink string) error {
+	body := fmt.Sprintf(
+		`Hello %s,
+
+You have requested to reset your password in E-commerce Shop.
+If you did not do so please ignore this email.
+
+To reset your current password follow the link:
+ %s
+The link is valid during 30 minutes.
+Best Regards,
+The Shop Team`, userName, tmpLink,
+	)
+
+	email := &SimpleEmail{
+		To:      userEmail,
+		Subject: "Reset Password",
+		Body:    body,
+	}
+	return e.SendSimpleEmail(email)
+}

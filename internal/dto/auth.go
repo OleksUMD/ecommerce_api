@@ -76,3 +76,7 @@ type TmpAuthResponse struct {
 	User     UserResponse `json:"user"`
 	TmpToken string       `json:"tmp_token"`
 }
+
+type ResetPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}

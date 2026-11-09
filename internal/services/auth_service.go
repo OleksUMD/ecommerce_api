@@ -315,3 +315,31 @@ func (s *AuthService) generateTmpAuthResponse(user *models.User) (*dto.TmpAuthRe
 func (s *AuthService) GetUnverifiedUser(token string) (*models.User, error) {
 	return s.userRepo.GetByTmpToken(token)
 }
+
+func (s *AuthService) ResetPassword(req *dto.ResetPasswordRequest) error {
+	user, err := s.userRepo.GetByEmail(req.Email)
+	if err != nil {
+		return err
+	}
+	tmpTokenStr, err := s.generateTmpTokenStr()
+	if err != nil {
+		return err
+	}
+	baseAddr := net.JoinHostPort(s.config.Server.Host, s.config.Server.Port)
+	tmpLink := fmt.Sprintf("http://%s/api/v1/auth/confirm-password-change/%s", baseAddr, tmpTokenStr)
+	payload := &models.UnverifiedUser{
+		UserID:   user.ID,
+		UserName: user.FirstName + " " + user.LastName,
+		Link:     tmpLink,
+		Email:    user.Email,
+	}
+	err = s.userRepo.SaveUnverifiedUser(tmpTokenStr, payload)
+	if err != nil {
+		return err
+	}
+	err = s.eventPublisher.Publish(notifications.UserResetPassword, payload, map[string]string{})
+	if err != nil {
+		return fmt.Errorf("failed to generate password reset event message: %w", err)
+	}
+	return nil
+}

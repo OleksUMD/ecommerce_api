@@ -20,6 +20,7 @@ type IAuthService interface {
 	AddMFA(user *models.User) (*dto.AddMFAResponse, error)
 	UseBackup(req *dto.BackupRequest) (*dto.AddMFAResponse, error)
 	GetUnverifiedUser(token string) (*models.User, error)
+	ResetPassword(req *dto.ResetPasswordRequest) error
 	generateAuthResponse(user *models.User) (*dto.AuthResponse, error)
 	generateAddMFAUserResponse(user *models.User) (*dto.AddMFAResponse, error)
 	checkBackupCode(backupCode, inputCode string) error

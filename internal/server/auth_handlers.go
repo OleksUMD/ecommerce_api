@@ -275,3 +275,68 @@ func (s *Server) useBackup(c *gin.Context) {
 	}
 	utils.SuccessResponse(c, "Account recovered successfully", response)
 }
+
+// @Summary Use backup code to recover user's MFA
+// @Description Use backup code to connect new device as MFA
+// @Tags Authentication
+// @Param request body dto.BackupRequest true "User backup data"
+// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
+// @Failure 500 {object} utils.Response "Server side error"
+// @Router /auth/reset-password [post]
+func (s *Server) sendChangePasswordLink(c *gin.Context) {
+	var req dto.ResetPasswordRequest
+	err := s.authService.ResetPassword(&req)
+	if err != nil {
+		utils.BadRequestResponse(c, "Failed to reset the password", err)
+		return
+	}
+	utils.SuccessResponse(
+		c,
+		fmt.Sprintf("Check the email(%s) to finish the password change flow", req.Email),
+		nil,
+	)
+}
+
+// @Summary Use backup code to recover user's MFA
+// @Description Use backup code to connect new device as MFA
+// @Tags Authentication
+// @Param request body dto.BackupRequest true "User backup data"
+// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
+// @Failure 500 {object} utils.Response "Server side error"
+// @Router /auth/change-password [post]
+func (s *Server) changePassword(c *gin.Context) {
+	var req dto.BackupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BadRequestResponse(c, "Invalid request data", err)
+		return
+	}
+	response, err := s.authService.UseBackup(&req)
+	if err != nil {
+		s.logger.Err(err).Msg("failed to use backup code")
+		utils.InternalServerErrorResponse(c, "Failed to use backup code", nil)
+		return
+	}
+	utils.SuccessResponse(c, "Account recovered successfully", response)
+}
+
+// @Summary Use backup code to recover user's MFA
+// @Description Use backup code to connect new device as MFA
+// @Tags Authentication
+// @Param request body dto.BackupRequest true "User backup data"
+// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
+// @Failure 404 {object} utils.Response "Not Found"
+// @Router /auth/confirm-password-change/{token} [get]
+func (s *Server) confirmPasswordChange(c *gin.Context) {
+	var req dto.BackupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		utils.BadRequestResponse(c, "Invalid request data", err)
+		return
+	}
+	response, err := s.authService.UseBackup(&req)
+	if err != nil {
+		s.logger.Err(err).Msg("failed to use backup code")
+		utils.InternalServerErrorResponse(c, "Failed to use backup code", nil)
+		return
+	}
+	utils.SuccessResponse(c, "Account recovered successfully", response)
+}

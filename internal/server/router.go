@@ -52,6 +52,9 @@ func (s *Server) setUpAuthRoutes(router *gin.RouterGroup) {
 	auth.POST("/verify-totp", s.verifyTOTP)
 	auth.GET("/add-mfa/:token", s.addMFA)
 	auth.POST("/backup-recovery", s.useBackup)
+	auth.POST("/reset-password", s.sendChangePasswordLink)
+	auth.POST("/change-password", s.changePassword)
+	auth.GET("/confirm-password-change/:token", s.confirmPasswordChange)
 }
 
 func (s *Server) setUpApiPrivateRoutes(router *gin.RouterGroup) {
