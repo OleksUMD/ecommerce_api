@@ -6,6 +6,7 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/models"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 )
 
 func (s *Server) authMiddleware() gin.HandlerFunc {
@@ -69,6 +70,21 @@ func (s *Server) adminMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		c.Next()
+	}
+}
+
+func (s *Server) rateLimitMiddleware(limit int) gin.HandlerFunc {
+	if limit <= 0 {
+		limit = 10
+	}
+	var limiter = rate.NewLimiter(rate.Limit(limit), 100)
+	return func(c *gin.Context) {
+		if !limiter.Allow() {
+			utils.TooManyRequestResponse(c, "Too many requests")
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }

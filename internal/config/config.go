@@ -22,9 +22,10 @@ type Config struct {
 
 // ServerConfig is a container for server configuration
 type ServerConfig struct {
-	Host    string
-	Port    string
-	GinMode string
+	Host      string
+	Port      string
+	GinMode   string
+	RateLimit int
 }
 
 // DatabaseConfig is a container for database configuration
@@ -106,10 +107,15 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	rateLimit, err := strconv.Atoi(getEnv("RATE_LIMIT", "10"))
+	if err != nil {
+		return nil, err
+	}
 	server := ServerConfig{
-		Port:    getEnv("PORT", "8080"),
-		Host:    getEnv("HOST", "localhost"),
-		GinMode: getEnv("GIN_MODE", "release"),
+		Port:      getEnv("PORT", "8080"),
+		Host:      getEnv("HOST", "localhost"),
+		GinMode:   getEnv("GIN_MODE", "release"),
+		RateLimit: rateLimit,
 	}
 	database := DatabaseConfig{
 		Host:     getEnv("DB_HOST", "localhost"),

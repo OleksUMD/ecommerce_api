@@ -104,3 +104,10 @@ func PaginatedSuccessResponse(c *gin.Context, message string, data any, meta Pag
 		Meta: meta,
 	})
 }
+
+func TooManyRequestResponse(c *gin.Context, message string) {
+	c.JSON(http.StatusTooManyRequests, Response{
+		Success: false,
+		Message: message,
+	})
+}

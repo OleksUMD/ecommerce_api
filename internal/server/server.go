@@ -60,6 +60,7 @@ func (s *Server) SetupRoutes() *gin.Engine {
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
 	router.Use(s.corsMiddleare())
+	router.Use(s.rateLimitMiddleware(s.config.Server.RateLimit))
 	router.GET("/health", s.healthCheck)
 
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
