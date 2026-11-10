@@ -16,11 +16,13 @@ type IAuthService interface {
 	Logout(userID uint) error
 	VerifyEmail(token string) error
 	VerifyTOTP(req *dto.TotpRequest) (*dto.AuthResponse, error)
+	VerifyUser(user *models.User) error
 	ResubmitVerificationLink(token string) (*dto.UserResponse, error)
 	AddMFA(user *models.User) (*dto.AddMFAResponse, error)
 	UseBackup(req *dto.BackupRequest) (*dto.AddMFAResponse, error)
 	GetUnverifiedUser(token string) (*models.User, error)
 	ResetPassword(req *dto.ResetPasswordRequest) error
+	ChangePassword(req *dto.ChangePasswordRequest) error
 	generateAuthResponse(user *models.User) (*dto.AuthResponse, error)
 	generateAddMFAUserResponse(user *models.User) (*dto.AddMFAResponse, error)
 	checkBackupCode(backupCode, inputCode string) error

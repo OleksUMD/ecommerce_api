@@ -210,6 +210,11 @@ func (s *AuthService) VerifyTOTP(req *dto.TotpRequest) (*dto.AuthResponse, error
 	return s.generateAuthResponse(user)
 }
 
+func (s *AuthService) VerifyUser(user *models.User) error {
+	user.IsVerified = true
+	return s.userRepo.Update(user)
+}
+
 func (s *AuthService) UseBackup(req *dto.BackupRequest) (*dto.AddMFAResponse, error) {
 	user, err := s.userRepo.GetByTmpToken(req.Token)
 	if err != nil {
@@ -342,4 +347,27 @@ func (s *AuthService) ResetPassword(req *dto.ResetPasswordRequest) error {
 		return fmt.Errorf("failed to generate password reset event message: %w", err)
 	}
 	return nil
+}
+
+func (s *AuthService) ChangePassword(req *dto.ChangePasswordRequest) error {
+	user, err := s.userRepo.GetByTmpToken(req.Token)
+	if err != nil {
+		return err
+	}
+	if !user.IsVerified {
+		return errors.New("user is not verified")
+	}
+	if req.NewPassword != req.ConfirmPassword {
+		return errors.New("new password is not equal to the confirmed one")
+	}
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return err
+	}
+	user.Password = hashedPassword
+	err = s.Logout(user.ID) // disable all access/refresh tokens
+	if err != nil {
+		return err
+	}
+	return s.userRepo.Update(user)
 }

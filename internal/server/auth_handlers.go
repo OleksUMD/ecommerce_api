@@ -179,6 +179,7 @@ func (s *Server) verifyEmail(c *gin.Context) {
 // @Description Send a temporary confirmation link to the user's email
 // @Tags User
 // @Produce json
+// @Param token path string true "Temporary verification token"
 // @Success 200 {object} utils.Response{data=dto.UserResponse} "Verification link has been sent successfully"
 // @Failure 404 {object} utils.Response "User not found"
 // @Router /auth/verify-email/{token} [post]
@@ -204,6 +205,7 @@ func (s *Server) resendVerificationLink(c *gin.Context) {
 // @Summary Get totp link to connect Authenticator
 // @Description Get link and backup code for MFA device connection
 // @Tags Authentication
+// @Param token path string true "Temporary verification token"
 // @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
 // @Failure 404 {object} utils.Response "User not found"
 // @Failure 500 {object} utils.Response "Server side error"
@@ -233,7 +235,6 @@ func (s *Server) addMFA(c *gin.Context) {
 // @Summary Second step of authentication.
 // @Description Verify user's identity with totp code and temporary token
 // @Tags Authentication
-// @Security BearerAuth
 // @Param request body dto.TotpRequest true "Temporary AuthToken and TOTP code from Authenticator"
 // @Success 200 {object} utils.Response{data=dto.AuthResponse} "Access and refresh tokens"
 // @Failure 400 {object} utils.Response "Invalid request data"
@@ -276,12 +277,12 @@ func (s *Server) useBackup(c *gin.Context) {
 	utils.SuccessResponse(c, "Account recovered successfully", response)
 }
 
-// @Summary Use backup code to recover user's MFA
-// @Description Use backup code to connect new device as MFA
+// @Summary Reset password through user's email
+// @Description Send password recovery link to the user's email
 // @Tags Authentication
-// @Param request body dto.BackupRequest true "User backup data"
-// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
-// @Failure 500 {object} utils.Response "Server side error"
+// @Param request body dto.ResetPasswordRequest true "Email to recover password"
+// @Success 200 {object} utils.Response{data=nil} "Link is successfully sent to the provided email"
+// @Failure 400 {object} utils.Response "Invalid request data"
 // @Router /auth/reset-password [post]
 func (s *Server) sendChangePasswordLink(c *gin.Context) {
 	var req dto.ResetPasswordRequest
@@ -297,46 +298,53 @@ func (s *Server) sendChangePasswordLink(c *gin.Context) {
 	)
 }
 
-// @Summary Use backup code to recover user's MFA
-// @Description Use backup code to connect new device as MFA
+// @Summary Send new password data
+// @Description Send new password with temporary token to change users's password
 // @Tags Authentication
-// @Param request body dto.BackupRequest true "User backup data"
-// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
-// @Failure 500 {object} utils.Response "Server side error"
+// @Param request body dto.ChangePasswordRequest true "Temporary token and new password"
+// @Success 200 {object} utils.Response{data=nil} "Password has been changed successfully."
+// @Failure 400 {object} utils.Response "Invalid request data"
 // @Router /auth/change-password [post]
 func (s *Server) changePassword(c *gin.Context) {
-	var req dto.BackupRequest
+	var req dto.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.BadRequestResponse(c, "Invalid request data", err)
 		return
 	}
-	response, err := s.authService.UseBackup(&req)
+	err := s.authService.ChangePassword(&req)
 	if err != nil {
 		s.logger.Err(err).Msg("failed to use backup code")
-		utils.InternalServerErrorResponse(c, "Failed to use backup code", nil)
+		utils.BadRequestResponse(c, "Failed to change the password", err)
 		return
 	}
-	utils.SuccessResponse(c, "Account recovered successfully", response)
+	utils.SuccessResponse(c, "Password change successfully. Login again to your account.", nil)
 }
 
-// @Summary Use backup code to recover user's MFA
-// @Description Use backup code to connect new device as MFA
+// @Summary Temporary link from user's email
+// @Description By following this link user confirms that it has access to registered email
 // @Tags Authentication
-// @Param request body dto.BackupRequest true "User backup data"
-// @Success 200 {object} utils.Response{data=dto.AddMFAResponse} "All parameters necessary to connect authenticator."
+// @Param token path string true "Temporary verification token"
+// @Success 200 {object} utils.Response{data=nil} "User confirmed its email account and now are able to change the password."
 // @Failure 404 {object} utils.Response "Not Found"
 // @Router /auth/confirm-password-change/{token} [get]
 func (s *Server) confirmPasswordChange(c *gin.Context) {
-	var req dto.BackupRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.BadRequestResponse(c, "Invalid request data", err)
+	token := c.Param("token")
+	if token == "" {
+		s.logger.Warn().Msg("invalid attempt to confirm password change request")
+		utils.NotFoundResponse(c, "Not found", nil)
 		return
 	}
-	response, err := s.authService.UseBackup(&req)
+	user, err := s.authService.GetUnverifiedUser(token)
 	if err != nil {
-		s.logger.Err(err).Msg("failed to use backup code")
-		utils.InternalServerErrorResponse(c, "Failed to use backup code", nil)
+		s.logger.Err(err).Msg("failed to confirm password change")
+		utils.NotFoundResponse(c, "Not found.", nil)
 		return
 	}
-	utils.SuccessResponse(c, "Account recovered successfully", response)
+	err = s.authService.VerifyUser(user)
+	if err != nil {
+		s.logger.Err(err).Msg("failed to verify user")
+		utils.NotFoundResponse(c, "Not found.", nil)
+		return
+	}
+	utils.SuccessResponse(c, "Request to change password was successfully confirmed", nil)
 }
