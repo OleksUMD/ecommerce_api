@@ -24,3 +24,6 @@ linters-settings:
       - opinionated
       - performance
       - style
+  govet:
+    enable:
+      - shadow

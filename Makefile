@@ -41,7 +41,7 @@ lint:
 	golangci-lint run ./...
 
 test:
-	@echo "The command has not been implemented yet"
+	go test ./...
 
 migrate-up:
 	migrate -path db/migrations -database "postgresql://$(DB_USER):$(DB_PASSWORD)@localhost:5445/ecommerce_api?sslmode=disable" up
