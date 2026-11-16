@@ -106,6 +106,7 @@ require (
 	github.com/magiconair/properties v1.18.12 // indirect
 	github.com/mattn/go-colorable v0.1.15 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
+	github.com/mdelapenya/tlscert v0.2.0 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.3.3 // indirect
 	github.com/moby/moby/api v1.56.1 // indirect
@@ -130,6 +131,7 @@ require (
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/testcontainers/testcontainers-go v0.45.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.45.0 // indirect
+	github.com/testcontainers/testcontainers-go/modules/redis v0.45.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

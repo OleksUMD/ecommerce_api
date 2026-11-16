@@ -110,12 +110,12 @@ func main() {
 		cacheService,
 	)
 	router := srv.SetupRoutes()
-	httpServer := &http.Server{
-		Addr:         fmt.Sprintf(":%s", cfg.Server.Port),
-		Handler:      router,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
+	httpServer := server.NewHttpServer(
+		fmt.Sprintf(":%s", cfg.Server.Port),
+		router,
+		10*time.Second,
+		10*time.Second,
+	)
 	go func() {
 		log.Info().Str("port", cfg.Server.Port).Msg("starting the http server...")
 		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {

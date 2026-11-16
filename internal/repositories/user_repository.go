@@ -11,10 +11,10 @@ import (
 
 type UserRepository struct {
 	db    *gorm.DB
-	cache *cache.CacheProvider
+	cache cache.ICacheProvider
 }
 
-func NewUserRepository(db *gorm.DB, rdb *cache.CacheProvider) *UserRepository {
+func NewUserRepository(db *gorm.DB, rdb cache.ICacheProvider) *UserRepository {
 	return &UserRepository{
 		db:    db,
 		cache: rdb,

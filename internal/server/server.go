@@ -3,6 +3,7 @@ package server
 
 import (
 	"net/http"
+	"time"
 
 	_ "github.com/OleksUMD/ecommerce_api/docs"
 	"github.com/OleksUMD/ecommerce_api/internal/cache"
@@ -50,6 +51,15 @@ func New(
 		uploadService:  uploadService,
 		cartService:    cartService,
 		orderService:   orderService,
+	}
+}
+
+func NewHttpServer(addr string, router *gin.Engine, readTimeout, writeTimeout time.Duration) *http.Server {
+	return &http.Server{
+		Addr:         addr,
+		Handler:      router,
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
 	}
 }
 
