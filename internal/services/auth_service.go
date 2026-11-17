@@ -42,6 +42,9 @@ func (s *AuthService) Register(req *dto.RegisterRequest) (*dto.UserResponse, err
 	if exists != nil {
 		return nil, errors.New("this email is already registered")
 	}
+	if err := utils.ValidatePassword(req.Password); err != nil {
+		return nil, err
+	}
 	hashedPassword, err := utils.HashPassword(req.Password)
 	if err != nil {
 		return nil, err

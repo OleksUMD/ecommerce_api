@@ -105,6 +105,7 @@ func cleanupTestData(t *testing.T) {
 		assert.NoError(t, err)
 	}
 }
+
 func createTestServer(db *gorm.DB, cache cache.ICacheProvider, cfg *config.Config) *http.Server {
 	log := logger.New()
 	eventPublisher := &utils.TestPublisher{}
