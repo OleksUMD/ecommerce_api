@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/config"
 	"github.com/OleksUMD/ecommerce_api/internal/database"
-	"github.com/OleksUMD/ecommerce_api/internal/interfaces"
+	"github.com/OleksUMD/ecommerce_api/internal/dto"
 	"github.com/OleksUMD/ecommerce_api/internal/logger"
 	"github.com/OleksUMD/ecommerce_api/internal/providers"
 	"github.com/OleksUMD/ecommerce_api/internal/repositories"
@@ -26,6 +27,7 @@ import (
 
 var testDB *sql.DB
 var testServer *http.Server
+var testProductService *services.ProductService
 
 func TestMain(m *testing.M) {
 	os.Exit(runTests(m))
@@ -81,6 +83,12 @@ func runTests(m *testing.M) int {
 	}()
 
 	testServer = createTestServer(gormDB, cacheService, cfg)
+	if err := seedDB(); err != nil {
+		println("before panic seed db")
+		panic(err)
+	} else {
+		println("database seeded")
+	}
 	code := m.Run()
 
 	fmt.Println("Run migrations down")
@@ -118,14 +126,9 @@ func createTestServer(db *gorm.DB, cache cache.ICacheProvider, cfg *config.Confi
 		eventPublisher,
 	)
 	userService := services.NewUserService(db, cfg)
-	productService := services.NewProductService(db, cfg)
+	testProductService = services.NewProductService(db, cfg)
 
-	var uploadProvider interfaces.UploadProvider
-	if cfg.Upload.UploadProvider == "s3" {
-		uploadProvider = providers.NewS3Provider(cfg)
-	} else {
-		uploadProvider = providers.NewLocalUploadProvider(cfg.Upload.Path)
-	}
+	uploadProvider := providers.NewLocalUploadProvider(cfg.Upload.Path)
 
 	uploadService := services.NewUploadService(uploadProvider)
 	cartService := services.NewCartService(db, cfg)
@@ -134,7 +137,7 @@ func createTestServer(db *gorm.DB, cache cache.ICacheProvider, cfg *config.Confi
 		cfg,
 		log,
 		authService,
-		productService,
+		testProductService,
 		userService,
 		uploadService,
 		cartService,
@@ -148,4 +151,49 @@ func createTestServer(db *gorm.DB, cache cache.ICacheProvider, cfg *config.Confi
 		10*time.Second,
 		10*time.Second,
 	)
+}
+
+func seedDB() error {
+	if testProductService == nil {
+		return errors.New("ProductService is not initialized")
+	}
+	categories := []dto.CreateCategoryRequest{
+		dto.CreateCategoryRequest{
+			Name:        "Category 1",
+			Description: "Description Category 1",
+		},
+		dto.CreateCategoryRequest{
+			Name:        "Category 2",
+			Description: "Description Category 2",
+		},
+	}
+	products := []dto.CreateProductRequest{
+		dto.CreateProductRequest{
+			Name:        "Product 1",
+			Description: "Description Product 1",
+			Price:       19.99,
+			Stock:       10,
+			SKU:         "SKU product 1",
+		},
+		dto.CreateProductRequest{
+			Name:        "Product 2",
+			Description: "Description Product 2",
+			Price:       13.99,
+			Stock:       13,
+			SKU:         "SKU product 2",
+		},
+	}
+	for ix, catReq := range categories {
+		res, err := testProductService.CreateCategory(&catReq)
+		if err != nil {
+			return err
+		}
+		prodReq := products[ix]
+		prodReq.CategoryID = res.ID
+		_, err = testProductService.CreateProduct(&prodReq)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
