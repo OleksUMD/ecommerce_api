@@ -61,6 +61,8 @@ type IOrderService interface {
 	CreateOrder(userID uint) (*dto.OrderResponse, error)
 	GetOrders(userID uint, page, limit int) ([]dto.OrderResponse, *utils.PaginationMeta, error)
 	GetOrder(userID, orderID uint) (*dto.OrderResponse, error)
+	PayOrder(eventID, paymentID string) error
+	SetPaymentID(userID, orderID uint, paymentIntentID string) error
 	getOrderResponse(tx *gorm.DB, id uint) (*dto.OrderResponse, error)
 	convertToOrderResponse(order *models.Order) dto.OrderResponse
 }

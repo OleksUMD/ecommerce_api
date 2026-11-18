@@ -143,6 +143,7 @@ func createTestServer(db *gorm.DB, cache cache.ICacheProvider, cfg *config.Confi
 		cartService,
 		orderService,
 		cache,
+		nil,
 	)
 	router := srv.SetupRoutes()
 	return server.NewHttpServer(

@@ -14,6 +14,7 @@ type OrderStatus string
 const (
 	OrderStatusPending   OrderStatus = "pending"
 	OrderStatusConfirmed OrderStatus = "confirmed"
+	OrderStatusPaid      OrderStatus = "paid"
 	OrderStatusShipped   OrderStatus = "shipped"
 	OrderStatusDelivered OrderStatus = "delivered"
 	OrderStatusCancelled OrderStatus = "cancelled"
@@ -21,13 +22,14 @@ const (
 
 // Order is a database table for user's order
 type Order struct {
-	ID          uint           `json:"id" gorm:"primaryKey"`
-	UserID      uint           `json:"user_id" gorm:"not null"`
-	Status      OrderStatus    `json:"status" gorm:"default:pending"`
-	TotalAmount float64        `json:"total_amount" gorm:"not null"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
+	ID              uint           `json:"id" gorm:"primaryKey"`
+	UserID          uint           `json:"user_id" gorm:"not null"`
+	Status          OrderStatus    `json:"status" gorm:"default:pending"`
+	TotalAmount     float64        `json:"total_amount" gorm:"not null"`
+	PaymentIntentID string         `json:"payment_intent_id" gorm:"unique"`
+	CreatedAt       time.Time      `json:"created_at"`
+	UpdatedAt       time.Time      `json:"updated_at"`
+	DeletedAt       gorm.DeletedAt `json:"-" gorm:"index"`
 
 	// Relationships
 	User       User        `json:"user"`
@@ -74,4 +76,9 @@ type CartItem struct {
 	// Relationships
 	Cart    Cart    `json:"-"`
 	Product Product `json:"product"`
+}
+
+type PaymentEvent struct {
+	EventID     string    `json:"event_id" gorm:"size:255;primaryKey"`
+	ProcessedAt time.Time `json:"processed_at" gorm:"autoCreateTime"`
 }

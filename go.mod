@@ -127,8 +127,10 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.6 // indirect
+	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
+	github.com/stripe/stripe-go/v87 v87.1.0 // indirect
 	github.com/testcontainers/testcontainers-go v0.45.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.45.0 // indirect
 	github.com/testcontainers/testcontainers-go/modules/redis v0.45.0 // indirect

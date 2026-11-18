@@ -9,6 +9,7 @@ import (
 	"github.com/OleksUMD/ecommerce_api/internal/models"
 	"github.com/OleksUMD/ecommerce_api/internal/utils"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type OrderService struct {
@@ -127,6 +128,40 @@ func (s *OrderService) GetOrder(userID, orderID uint) (*dto.OrderResponse, error
 	}
 	response := s.convertToOrderResponse(&order)
 	return &response, nil
+}
+
+func (s *OrderService) SetPaymentID(userID, orderID uint, paymentIntentID string) error {
+	var order models.Order
+	if err := s.db.Where("user_id = ? AND id = ?", userID, orderID).
+		First(&order).Error; err != nil {
+		return err
+	}
+	order.PaymentIntentID = paymentIntentID
+	return s.db.Save(&order).Error
+}
+func (s *OrderService) PayOrder(eventID, paymentID string) error {
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		event := models.PaymentEvent{
+			EventID: eventID,
+		}
+		result := tx.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "event_id"}},
+			DoNothing: true,
+		}).Create(&event)
+		if result.Error != nil {
+			return result.Error
+		}
+		if result.RowsAffected == 0 {
+			return nil
+		}
+		updateResult := tx.Model(&models.Order{}).
+			Where("payment_intent_id = ? AND status != ?", paymentID, models.OrderStatusPaid).
+			Update("status", models.OrderStatusPaid)
+		if updateResult.Error != nil {
+			return updateResult.Error
+		}
+		return nil
+	})
 }
 
 func (s *OrderService) getOrderResponse(tx *gorm.DB, id uint) (*dto.OrderResponse, error) {

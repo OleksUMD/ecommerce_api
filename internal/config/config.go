@@ -18,6 +18,7 @@ type Config struct {
 	Upload   UploadConfig
 	SMTP     SMTPConfig
 	Cache    CacheConfig
+	Payment  PaymentConfig
 }
 
 // ServerConfig is a container for server configuration
@@ -79,6 +80,11 @@ type UploadConfig struct {
 	Path           string
 	MaxFileSize    int64
 	UploadProvider string
+}
+
+type PaymentConfig struct {
+	SecretKey     string
+	WebhookSecret string
 }
 
 // Load get configuration from environment variables and create corresponding container(struct) for each of them
@@ -163,6 +169,11 @@ func Load() (*Config, error) {
 		CacheDB:  0,
 	}
 
+	payment := PaymentConfig{
+		SecretKey:     getEnv("STRIPE_SECRET_KEY", "stripe-very-secret-key"),
+		WebhookSecret: getEnv("STRIPE_WEBHOOK_SECRET", "webhook-very-secret"),
+	}
+
 	config := &Config{}
 	config.Server = server
 	config.Database = database
@@ -171,6 +182,7 @@ func Load() (*Config, error) {
 	config.Upload = upload
 	config.SMTP = smtp
 	config.Cache = cache
+	config.Payment = payment
 	return config, err
 }
 

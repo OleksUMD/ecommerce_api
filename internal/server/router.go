@@ -107,6 +107,7 @@ func (s *Server) setUpOrderRoutes(router *gin.RouterGroup) {
 	orderRoutes.POST("/", s.createOrder)
 	orderRoutes.GET("/", s.getOrders)
 	orderRoutes.GET("/:id", s.getOrder)
+	orderRoutes.POST("/:id/payment", s.payForOrder)
 }
 
 func (s *Server) setUpApiPublicRoutes(router *gin.RouterGroup) {
@@ -115,4 +116,5 @@ func (s *Server) setUpApiPublicRoutes(router *gin.RouterGroup) {
 	router.GET("/search", s.searchProducts)
 	router.GET("/products", s.getProducts)
 	router.GET("/products/:id", s.getProduct)
+	router.POST("/payment/orders", s.stripeWebhook)
 }

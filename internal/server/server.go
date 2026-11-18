@@ -8,6 +8,7 @@ import (
 	_ "github.com/OleksUMD/ecommerce_api/docs"
 	"github.com/OleksUMD/ecommerce_api/internal/cache"
 	"github.com/OleksUMD/ecommerce_api/internal/config"
+	"github.com/OleksUMD/ecommerce_api/internal/providers"
 	"github.com/OleksUMD/ecommerce_api/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
@@ -18,15 +19,16 @@ import (
 
 // Server is an app http server
 type Server struct {
-	config         *config.Config
-	logger         zerolog.Logger
-	cache          cache.ICacheProvider
-	authService    services.IAuthService
-	productService services.IProductService
-	userService    services.IUserService
-	uploadService  services.IUploadService
-	cartService    services.ICartService
-	orderService   services.IOrderService
+	config          *config.Config
+	logger          zerolog.Logger
+	cache           cache.ICacheProvider
+	authService     services.IAuthService
+	productService  services.IProductService
+	userService     services.IUserService
+	uploadService   services.IUploadService
+	cartService     services.ICartService
+	orderService    services.IOrderService
+	paymentProvider *providers.PaymentProvider
 }
 
 // New creates and returns a new instance of app server
@@ -40,17 +42,19 @@ func New(
 	cartService services.ICartService,
 	orderService services.IOrderService,
 	cache cache.ICacheProvider,
+	paymentProvider *providers.PaymentProvider,
 ) *Server {
 	return &Server{
-		config:         cfg,
-		logger:         logger,
-		cache:          cache,
-		authService:    authService,
-		productService: productService,
-		userService:    userService,
-		uploadService:  uploadService,
-		cartService:    cartService,
-		orderService:   orderService,
+		config:          cfg,
+		logger:          logger,
+		cache:           cache,
+		authService:     authService,
+		productService:  productService,
+		userService:     userService,
+		uploadService:   uploadService,
+		cartService:     cartService,
+		orderService:    orderService,
+		paymentProvider: paymentProvider,
 	}
 }
 

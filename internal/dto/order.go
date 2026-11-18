@@ -53,3 +53,8 @@ type OrderItemResponse struct {
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
 }
+
+type PaymentIntentResponse struct {
+	ID           string `json:"-"`
+	ClientSecret string `json:"client_secret"`
+}

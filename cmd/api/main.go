@@ -98,6 +98,7 @@ func main() {
 	uploadService := services.NewUploadService(uploadProvider)
 	cartService := services.NewCartService(db, cfg)
 	orderService := services.NewOrderService(db, cfg)
+	paymentProvider := providers.NewPaymentProvider(&cfg.Payment)
 	srv := server.New(
 		cfg,
 		log,
@@ -108,6 +109,7 @@ func main() {
 		cartService,
 		orderService,
 		cacheService,
+		paymentProvider,
 	)
 	router := srv.SetupRoutes()
 	httpServer := server.NewHttpServer(
