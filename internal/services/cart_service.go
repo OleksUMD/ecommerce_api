@@ -40,7 +40,7 @@ func (s *CartService) AddToCart(userID uint, req *dto.AddToCartRequest) (*dto.Ca
 		return nil, errors.New("insufficient amount on stock")
 	}
 	var cart models.Cart
-	if err := s.db.First(&cart, userID).Error; err != nil {
+	if err := s.db.Where("user_id = ?", userID).First(&cart).Error; err != nil {
 		cart = models.Cart{UserID: userID}
 		if err := s.db.Create(&cart).Error; err != nil {
 			return nil, err
